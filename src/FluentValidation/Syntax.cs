@@ -16,14 +16,13 @@
 // The latest version of this file can be found at http://www.codeplex.com/FluentValidation
 #endregion
 
-using System.Linq.Expressions;
-
 namespace FluentValidation {
 	using System;
 	using System.Collections.Generic;
 	using Internal;
 	using Syntax;
 	using Validators;
+    using System.Linq.Expressions;
 
 	/// <summary>
 	/// Rule builder that starts the chain
@@ -56,7 +55,7 @@ namespace FluentValidation {
 		IRuleBuilderOptions<T, TProperty> SetValidator(IValidator validator);
 
         IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TModel, TValidator>(Expression<Func<TModel, TProperty>> expression) where TValidator : IValidator<TModel>, new();
-	    IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TValidator>() where TValidator : IValidator, new();
+        IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TValidator>() where TValidator : IValidator, new();
 	}
 
 
