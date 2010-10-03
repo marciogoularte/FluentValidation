@@ -21,6 +21,7 @@ namespace FluentValidation.Internal {
 	using System.Collections.Generic;
 	using Syntax;
 	using Validators;
+    using System.Linq.Expressions;
 
 	/// <summary>
 	/// Builds a validation rule and constructs a validator.
@@ -61,6 +62,30 @@ namespace FluentValidation.Internal {
 			SetValidator(Extensions.InferPropertyValidatorForChildValidator(Rule, validator));
 			return this;
 		}
+
+        public IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TModel, TValidator>(Expression<Func<TModel, TProperty>> expression) where TValidator : IValidator<TModel>, new()
+        {
+            AddValidators<TValidator>(expression.GetMember().Name);
+            return this;
+        }
+
+        public IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TValidator>() where TValidator : IValidator, new()
+        {
+            AddValidators<TValidator>(rule.PropertyName);
+            return this;
+        }
+
+        private void AddValidators<TValidator>(string name) where TValidator : IValidator, new()
+        {
+            var validator = new TValidator();
+            var descriptor = validator.CreateDescriptor();
+            var validators = descriptor.GetValidatorsForMember(name);
+
+            foreach (var val in validators)
+            {
+                SetValidator(val);
+            }
+        }
 
 		[Obsolete("Use Cascade(CascadeMode.StopOnFirstFailure) or Cascade(CascadeMode.Continue) instead")]
 		public CascadeStep<T, TProperty> Cascade() {
