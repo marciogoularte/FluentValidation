@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FluentValidation</RootNamespace>
-    <AssemblyName>FluentValidation.WP7</AssemblyName>
+    <AssemblyName>FluentValidation</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
     <TargetFrameworkProfile>WindowsPhone</TargetFrameworkProfile>
@@ -86,9 +86,6 @@
     <Compile Include="..\FluentValidation\Attributes\ValidatorAttribute.cs">
       <Link>ValidatorAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\FluentValidation\BackwardsCompatibility.cs">
-      <Link>BackwardsCompatibility.cs</Link>
-    </Compile>
     <Compile Include="..\FluentValidation\DefaultValidatorExtensions.cs">
       <Link>DefaultValidatorExtensions.cs</Link>
     </Compile>
@@ -161,6 +158,9 @@
     <Compile Include="..\FluentValidation\Resources\IErrorMessageSource.cs">
       <Link>IErrorMessageSource.cs</Link>
     </Compile>
+    <Compile Include="..\FluentValidation\Resources\IResourceAccessorBuilder.cs">
+      <Link>IResourceAccessorBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\FluentValidation\Resources\LocalizedErrorMessageSource.cs">
       <Link>LocalizedErrorMessageSource.cs</Link>
     </Compile>
@@ -178,9 +178,6 @@
     </Compile>
     <Compile Include="..\FluentValidation\Syntax.cs">
       <Link>Syntax.cs</Link>
-    </Compile>
-    <Compile Include="..\FluentValidation\Syntax\CascadeStep.cs">
-      <Link>CascadeStep.cs</Link>
     </Compile>
     <Compile Include="..\FluentValidation\ValidationContext.cs">
       <Link>ValidationContext.cs</Link>

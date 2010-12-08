@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -48,6 +48,14 @@ namespace FluentValidation.Validators {
 			int count = 0;
 
 			foreach (var element in collection) {
+
+				if(element == null) {
+					// If an element in the validator is null then we want to skip it to prevent NullReferenceExceptions in the child validator.
+					// We still need to update the counter to ensure the indexes are correct.
+					count++;
+					continue;
+				}
+
 				var childPropertyChain = new PropertyChain(context.PropertyChain);
 				childPropertyChain.Add(context.Member);
 				childPropertyChain.AddIndexer(count++);

@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\FluentValidation.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\FluentValidation.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -69,10 +69,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Web.Mvc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="System.Web.Mvc, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\mvc\System.Web.Mvc.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\lib\mvc\v2\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -116,7 +115,6 @@
     <Compile Include="CustomFailureActionTester.cs" />
     <Compile Include="ExactLengthValidatorTester.cs" />
     <Compile Include="ExclusiveBetweenValidatorTests.cs" />
-    <Compile Include="FluentValidationModelBinderTester.cs" />
     <Compile Include="FluentValidationModelMetadataProviderTester.cs" />
     <Compile Include="FluentValidationModelValidatorProviderTests.cs" />
     <Compile Include="InclusiveBetweenValidatorTests.cs" />
@@ -140,7 +138,6 @@
     <Compile Include="NotEmptyTester.cs" />
     <Compile Include="NotEqualValidatorTests.cs" />
     <Compile Include="NotNullTester.cs" />
-    <Compile Include="BackwardsCompatibilityTester.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="PredicateValidatorTester.cs" />
     <Compile Include="PropertyChainTests.cs" />
@@ -173,7 +170,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\FluentValidation.snk">
+    <None Include="..\FluentValidation.snk">
       <Link>FluentValidation.snk</Link>
     </None>
   </ItemGroup>

@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -37,7 +37,7 @@ namespace FluentValidation.Validators {
 		}
 
 		protected PropertyValidator(string errorMessageResourceName, Type errorMessageResourceType) {
-			errorSource = new LocalizedErrorMessageSource(errorMessageResourceType, errorMessageResourceName);
+			errorSource = new LocalizedErrorMessageSource(errorMessageResourceType, errorMessageResourceName, new FallbackAwareResurceAccessorBuilder());
 		}
 
 		protected PropertyValidator(string errorMessage) {
@@ -45,7 +45,7 @@ namespace FluentValidation.Validators {
 		}
 
 		protected PropertyValidator(Expression<Func<string>> errorMessageResourceSelector) {
-			errorSource = LocalizedErrorMessageSource.CreateFromExpression(errorMessageResourceSelector);
+			errorSource = LocalizedErrorMessageSource.CreateFromExpression(errorMessageResourceSelector, new FallbackAwareResurceAccessorBuilder());
 		}
 
 		public IErrorMessageSource ErrorMessageSource {

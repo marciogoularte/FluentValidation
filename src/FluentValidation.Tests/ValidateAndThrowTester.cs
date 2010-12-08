@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -17,11 +17,20 @@
 #endregion
 
 namespace FluentValidation.Tests {
-	using System.Linq;
-	using NUnit.Framework;
+    using System.Globalization;
+    using System.Linq;
+    using System.Threading;
+    using NUnit.Framework;
 
 	[TestFixture]
 	public class ValidateAndThrowTester {
+
+        [SetUp]
+        public void SetUp() {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+        }
+
 		[Test]
 		public void Throws_exception() {
 			var validator = new TestValidator {
@@ -48,6 +57,17 @@ namespace FluentValidation.Tests {
 
 			var ex = (ValidationException)typeof(ValidationException).ShouldBeThrownBy(() => validator.ValidateAndThrow(new Person()));
 			ex.Errors.Count().ShouldEqual(1);
+		}
+
+		[Test]
+		public void ToString_provides_error_details() {
+			var validator = new TestValidator {
+				v => v.RuleFor(x => x.Surname).NotNull(),
+				v => v.RuleFor(x => x.Forename).NotNull()
+			};
+
+			var ex = typeof(ValidationException).ShouldBeThrownBy(() => validator.ValidateAndThrow(new Person()));
+			ex.ToString().ShouldStartWith("FluentValidation.ValidationException: Validation failed: \r\n -- 'Surname' must not be empty.\r\n -- 'Forename' must not be empty.");
 		}
 	}
 }

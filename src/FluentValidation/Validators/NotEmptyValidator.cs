@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -13,11 +13,11 @@
 // See the License for the specific language governing permissions and 
 // limitations under the License.
 // 
-// The latest version of this file can be found at http://www.codeplex.com/FluentValidation
+// The latest version of this file can be found at http://fluentvalidation.codeplex.com
 #endregion
 
 namespace FluentValidation.Validators {
-	using Attributes;
+	using System.Collections;
 	using Resources;
 
 	public class NotEmptyValidator : PropertyValidator, INotEmptyValidator {
@@ -29,22 +29,29 @@ namespace FluentValidation.Validators {
 		}
 
 		protected override bool IsValid(PropertyValidatorContext context) {
-			if (context.PropertyValue == null || IsInvalidString(context.PropertyValue) ||
-				Equals(context.PropertyValue, defaultValueForType)) {
+			if (context.PropertyValue == null
+			    || IsInvalidString(context.PropertyValue)
+			    || IsEmptyCollection(context.PropertyValue)
+			    || Equals(context.PropertyValue, defaultValueForType)) {
 				return false;
 			}
 
 			return true;
 		}
 
-		private bool IsInvalidString(object value) {
-			if(value is string) {
+		bool IsEmptyCollection(object propertyValue) {
+			var collection = propertyValue as ICollection;
+			return collection != null && collection.Count == 0;
+		}
+
+		bool IsInvalidString(object value) {
+			if (value is string) {
 				return IsNullOrWhiteSpace(value as string);
 			}
 			return false;
 		}
 
-		private bool IsNullOrWhiteSpace(string value) {
+		bool IsNullOrWhiteSpace(string value) {
 			if (value != null) {
 				for (int i = 0; i < value.Length; i++) {
 					if (!char.IsWhiteSpace(value[i])) {
@@ -53,7 +60,6 @@ namespace FluentValidation.Validators {
 				}
 			}
 			return true;
-
 		}
 	}
 

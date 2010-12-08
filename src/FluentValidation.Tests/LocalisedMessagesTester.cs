@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -17,6 +17,7 @@
 #endregion
 
 namespace FluentValidation.Tests {
+	using System;
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.Linq;
@@ -29,13 +30,19 @@ namespace FluentValidation.Tests {
 	[TestFixture]
 	public class LocalisedMessagesTester {
 
+		[TearDown]
+		public void Teardown() {
+			// ensure the resource provider is reset after any tests that use it.
+			ValidatorOptions.ResourceProviderType = null;
+		}
+
 		[Test]
 		public void Correctly_assigns_default_localized_error_message() {
 			var originalCulture = Thread.CurrentThread.CurrentUICulture;
 			try {
 				var validator = new NotEmptyValidator(null);
 
-				foreach (var culture in new[] {"en", "de", "fr"}) {
+				foreach (var culture in new[] { "en", "de", "fr" }) {
 					Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
 					var message = Messages.ResourceManager.GetString("notempty_error");
 					var errorMessage = new MessageFormatter().AppendPropertyName("name").BuildMessage(message);
@@ -51,14 +58,15 @@ namespace FluentValidation.Tests {
 		}
 
 		[Test]
-		public void Uses_custom_resouces() {
+		public void ResourceProviderType_overrides_default_messagesnote() {
 			ValidatorOptions.ResourceProviderType = typeof(MyResources);
 
-			var validator = new NotEmptyValidator(null);
-			var result = validator.Validate(new PropertyValidatorContext("name", null, x => null));
-			result.Single().ErrorMessage.ShouldEqual("foo");
+			var validator = new TestValidator() {
+				v => v.RuleFor(x => x.Surname).NotEmpty()
+			};
 
-			ValidatorOptions.ResourceProviderType = null;
+			var result = validator.Validate(new Person());
+			result.Errors.Single().ErrorMessage.ShouldEqual("foo");
 		}
 
 		[Test]
@@ -69,9 +77,62 @@ namespace FluentValidation.Tests {
 			result.Errors.Single().ErrorMessage.ShouldEqual("foo");
 		}
 
+		[Test]
+		public void When_using_explicitly_localized_message_does_not_fall_back_to_ResourceProvider() {
+			ValidatorOptions.ResourceProviderType = typeof(MyResources);
+
+			var validator = new TestValidator {
+				v => v.RuleFor(x => x.Surname).NotEmpty().WithLocalizedMessage(() => MyOverridenResources.notempty_error)
+			};
+
+			var results = validator.Validate(new Person());
+			results.Errors.Single().ErrorMessage.ShouldEqual("bar");
+		}
+
+		[Test]
+		public void Custom_property_validators_should_respect_ResourceProvider() {
+			ValidatorOptions.ResourceProviderType = typeof(MyResources);
+			var validator = new TestValidator {
+				v => v.RuleFor(x => x.Surname).SetValidator(new MyPropertyValidator())
+			};
+
+			var results = validator.Validate(new Person());
+			results.Errors.Single().ErrorMessage.ShouldEqual("foo");
+		}
+
+
+		[Test]
+		public void When_using_explicitly_localized_message_with_custom_validator_does_not_fall_back_to_ResourceProvider() {
+			ValidatorOptions.ResourceProviderType = typeof(MyResources);
+
+			var validator = new TestValidator {
+				v => v.RuleFor(x => x.Surname).SetValidator(new MyPropertyValidator())
+					.WithLocalizedMessage(() => MyOverridenResources.notempty_error)
+			};
+
+			var results = validator.Validate(new Person());
+			results.Errors.Single().ErrorMessage.ShouldEqual("bar");
+		}
+
 		private class MyResources {
 			public static string notempty_error {
 				get { return "foo"; }
+			}
+		}
+
+		private class MyOverridenResources {
+			public static string notempty_error {
+				get { return "bar"; }
+			}
+		}
+
+		private class MyPropertyValidator : PropertyValidator {
+			public MyPropertyValidator() : base(() => MyOverridenResources.notempty_error) {
+				
+			}
+
+			protected override bool IsValid(PropertyValidatorContext context) {
+				return false;
 			}
 		}
 	}

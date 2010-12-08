@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -84,11 +84,6 @@ namespace FluentValidation.Internal {
 					CurrentValidator = newValidator;
 				}
 			}
-		}
-
-		[Obsolete("Use ReplaceValiadtor instead.")]
-		public void ReplaceCurrentValidtor(IPropertyValidator newValidator) {
-			ReplaceValidator(CurrentValidator, newValidator);
 		}
 
 		/// <summary>

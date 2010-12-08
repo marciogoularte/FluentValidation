@@ -1,4 +1,18 @@
-2.0 beta 1 - 
+2.0 RC1 - 
+* Allow custom MVC ModelValidators to be added to the FVModelValidatorProvider
+* Support resource provider for custom property validators through the new IResourceAccessorBuilder interface
+
+2.0 beta 2 - 9 November 2010
+* Breaking change - Renamed the assembly names for SL/WP7 assemblies to FluentValidation.dll for consistency (formerly FluentValidation.Silverlight and FluentValidation.WP7)
+* Breaking change - Finally removed the FV 1.1 backwards compatibility layer.
+* Breaking chagne - Removed the deprecated Cascade() method - use Cascade(cascadeMode) instead (this was deprecated in 1.3)
+* Provide more useful information in ValidationException error message.
+* FluentValidatorModelMetadataProvider now converts NotNull/NotEmpty validators to IsRequired in metadata.
+* Patch - updated German localization
+* Using a child validator on a collection will now skip items in the collection that are null.
+* NotEmptyValidator can now work against empty collections (must implement ICollection)
+
+2.0 beta 1 - October 7 2010
 * AttributedValidatorFactory is finally production worthy with the introduction of InstanceCache
 * Fixed an issue where CascadeMode values are ignored if they're changed after the rules have been defined.
 * Ported FluentValidation to WP7.

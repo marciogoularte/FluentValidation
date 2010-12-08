@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -72,6 +72,13 @@ namespace FluentValidation.Tests {
 
 			var result = validator.Validate(person);
 			result.IsValid.ShouldBeTrue();
+		}
+
+		[Test]
+		public void Skips_null_items() {
+			person.Orders[0] = null;
+			var results = validator.Validate(person);
+			results.Errors.Count.ShouldEqual(2); //2 errors - 1 for person, 1 for 2nd Order.
 		}
 
 		public class OrderValidator : AbstractValidator<Order> {

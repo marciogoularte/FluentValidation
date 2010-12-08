@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -18,8 +18,6 @@
 
 namespace FluentValidation.Internal {
 	using System;
-	using System.Collections.Generic;
-	using Syntax;
 	using Validators;
     using System.Linq.Expressions;
 
@@ -105,11 +103,6 @@ namespace FluentValidation.Internal {
                 SetValidator(val);
             }
         }
-
-		[Obsolete("Use Cascade(CascadeMode.StopOnFirstFailure) or Cascade(CascadeMode.Continue) instead")]
-		public CascadeStep<T, TProperty> Cascade() {
-			return new CascadeStep<T, TProperty>(this);
-		}
 
 		IRuleBuilderOptions<T, TProperty> IConfigurable<PropertyRule<T>, IRuleBuilderOptions<T, TProperty>>.Configure(Action<PropertyRule<T>> configurator) {
 			configurator(rule);

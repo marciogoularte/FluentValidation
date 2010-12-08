@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -42,6 +42,13 @@ namespace FluentValidation.Mvc {
 		public FluentValidationModelValidatorProvider(IValidatorFactory validatorFactory) {
 			AddImplicitRequiredValidator = true;
 			this.validatorFactory = validatorFactory;
+		}
+
+		public void Add(Type validatorType, FluentValidationModelValidationFactory factory) {
+			if(validatorType == null) throw new ArgumentNullException("validatorType");
+			if(factory == null) throw new ArgumentNullException("factory");
+
+			validatorFactories[validatorType] = factory;
 		}
 
 		public override IEnumerable<ModelValidator> GetValidators(ModelMetadata metadata, ControllerContext context) {

@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -20,7 +20,6 @@ namespace FluentValidation {
 	using System;
 	using System.Collections.Generic;
 	using Internal;
-	using Syntax;
 	using Validators;
     using System.Linq.Expressions;
 
@@ -30,8 +29,6 @@ namespace FluentValidation {
 	/// <typeparam name="T"></typeparam>
 	/// <typeparam name="TProperty"></typeparam>
 	public interface IRuleBuilderInitial<T, TProperty> : IFluentInterface, IRuleBuilder<T, TProperty>, IConfigurable<PropertyRule<T>, IRuleBuilderInitial<T, TProperty>> {
-		[Obsolete("Use Cascade(CascadeMode.StopOnFirstFailure) or Cascade(CascadeMode.Continue) instead")]
-		CascadeStep<T, TProperty> Cascade();
 	}
 
 	/// <summary>

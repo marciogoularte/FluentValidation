@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\FluentValidation.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\FluentValidation.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -77,7 +77,6 @@
     <Compile Include="AssemblyScanner.cs" />
     <Compile Include="Attributes\AttributedValidatorFactory.cs" />
     <Compile Include="Attributes\ValidatorAttribute.cs" />
-    <Compile Include="BackwardsCompatibility.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="DefaultValidatorExtensions.cs" />
     <Compile Include="DefaultValidatorOptions.cs" />
@@ -97,9 +96,9 @@
     <Compile Include="Internal\PropertyChain.cs" />
     <Compile Include="Internal\PropertyRule.cs" />
     <Compile Include="Resources\IErrorMessageSource.cs" />
+    <Compile Include="Resources\IResourceAccessorBuilder.cs" />
     <Compile Include="Resources\LocalizedErrorMessageSource.cs" />
     <Compile Include="Resources\StringErrorMessageSource.cs" />
-    <Compile Include="Syntax\CascadeStep.cs" />
     <Compile Include="ValidationContext.cs" />
     <Compile Include="Internal\IValidatorSelector.cs" />
     <Compile Include="Resources\Messages.Designer.cs">
@@ -159,7 +158,7 @@
     <EmbeddedResource Include="Resources\Messages.sv.resx" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\FluentValidation.snk">
+    <None Include="..\FluentValidation.snk">
       <Link>FluentValidation.snk</Link>
     </None>
   </ItemGroup>
@@ -179,9 +178,6 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

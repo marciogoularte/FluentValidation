@@ -1,5 +1,5 @@
 #region License
-// Copyright 2008-2009 Jeremy Skinner (http://www.jeremyskinner.co.uk)
+// Copyright (c) Jeremy Skinner (http://www.jeremyskinner.co.uk)
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); 
 // you may not use this file except in compliance with the License. 
@@ -21,6 +21,7 @@ namespace FluentValidation.Tests {
 	using System.Collections.Generic;
 	using System.Linq;
 	using NUnit.Framework;
+	using NUnit.Framework.Constraints;
 	using Results;
 
 	//Inspired by SpecUnit's SpecificationExtensions
@@ -61,6 +62,10 @@ namespace FluentValidation.Tests {
 
 		public static bool IsValid(this IEnumerable<ValidationFailure> errors) {
 			return errors.Count() == 0;
+		}
+
+		public static void ShouldStartWith(this object actual, string expected) {
+			Assert.That(actual, new StartsWithConstraint(expected));
 		}
 	}
 }
