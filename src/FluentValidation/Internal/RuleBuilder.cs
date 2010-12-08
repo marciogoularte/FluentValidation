@@ -30,6 +30,7 @@ namespace FluentValidation.Internal {
 	/// <typeparam name="TProperty">Type of property being validated</typeparam>
 	public class RuleBuilder<T, TProperty> : IRuleBuilderOptions<T, TProperty>, IRuleBuilderInitial<T, TProperty> {
 		readonly PropertyRule<T> rule;
+	    readonly Func<Type, object> constructor;
 
 		public PropertyRule<T> Rule {
 			get { return rule; }
@@ -38,8 +39,10 @@ namespace FluentValidation.Internal {
 		/// <summary>
 		/// Creates a new instance of the <see cref="RuleBuilder{T,TProperty}">RuleBuilder</see> class.
 		/// </summary>
-		public RuleBuilder(PropertyRule<T> rule) {
+        public RuleBuilder(PropertyRule<T> rule, Func<Type, object> constructor)
+        {
 			this.rule = rule;
+		    this.constructor = constructor;
 		}
 
 		/// <summary>
@@ -63,21 +66,37 @@ namespace FluentValidation.Internal {
 			return this;
 		}
 
-        public IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TModel, TValidator>(Expression<Func<TModel, TProperty>> expression) where TValidator : IValidator<TModel>, new()
-        {
+        /// <summary>
+        /// Uses the validator specified to extract the rule
+        /// </summary>
+        /// <typeparam name="TModel">The model to extract property name</typeparam>
+        /// <typeparam name="TValidator">The validator to extract property from</typeparam>
+        public IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TModel, TValidator>(Expression<Func<TModel, TProperty>> expression) where TValidator : IValidator<TModel> {
             AddValidators<TValidator>(expression.GetMember().Name);
             return this;
         }
 
-        public IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TValidator>() where TValidator : IValidator, new()
-        {
+        /// <summary>
+        /// Uses the validator specified to extract the rule
+        /// </summary>
+        /// <typeparam name="TValidator">The validator to extract property from using the same name</typeparam>
+        public IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TValidator>() where TValidator : IValidator {
             AddValidators<TValidator>(rule.PropertyName);
             return this;
         }
 
-        private void AddValidators<TValidator>(string name) where TValidator : IValidator, new()
-        {
-            var validator = new TValidator();
+        /// <summary>
+        /// Sets the validator associated with the rule. Use with complex properties where an IValidator instance is already declared for the property type.
+        /// </summary>
+        /// <typeparam name="TValidator">The validator to set</typeparam>
+	    public IRuleBuilderOptions<T, TProperty> Using<TValidator>() where TValidator : IValidator {
+	        var validator = (IValidator)constructor(typeof (TValidator));
+	        SetValidator(validator);
+            return this;
+	    }
+
+	    private void AddValidators<TValidator>(string name) where TValidator : IValidator {
+            var validator = (IValidator)constructor(typeof(TValidator));
             var descriptor = validator.CreateDescriptor();
             var validators = descriptor.GetValidatorsForMember(name);
 

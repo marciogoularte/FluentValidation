@@ -98,7 +98,7 @@ namespace FluentValidation {
 			expression.Guard("Cannot pass null to RuleFor");
 			var rule = PropertyRule<T>.Create(expression, () => CascadeMode);
 			AddRule(rule);
-			var ruleBuilder = new RuleBuilder<T, TProperty>(rule);
+			var ruleBuilder = new RuleBuilder<T, TProperty>(rule, Configuration.Construct);
 			return ruleBuilder;
 		}
 
