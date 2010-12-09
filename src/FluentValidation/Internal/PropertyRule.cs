@@ -22,6 +22,7 @@ namespace FluentValidation.Internal {
 	using System.Linq;
 	using System.Linq.Expressions;
 	using System.Reflection;
+	using Resources;
 	using Results;
 	using Validators;
 
@@ -32,7 +33,9 @@ namespace FluentValidation.Internal {
 		public MemberInfo Member { get; private set; }
 		public PropertySelector PropertyFunc { get; private set; }
 		public Expression Expression { get; private set; }
-		public string CustomPropertyName { get; set; }
+
+		public IStringSource CustomPropertyName { get; set; }
+
 		public Action<object> OnFailure { get; set; }
 		public IPropertyValidator CurrentValidator { get; private set; }
 		public Type TypeToValidate { get; private set; }
@@ -93,7 +96,14 @@ namespace FluentValidation.Internal {
 		public string PropertyName { get; set; }
 
 		public string PropertyDescription {
-			get { return CustomPropertyName ?? PropertyName.SplitPascalCase(); }
+			get {
+				
+				if(CustomPropertyName != null) {
+					return CustomPropertyName.GetString();
+				}
+
+				return PropertyName.SplitPascalCase();
+			}
 		}
 
 		public virtual IEnumerable<ValidationFailure> Validate(ValidationContext<T> context) {
@@ -138,7 +148,7 @@ namespace FluentValidation.Internal {
 		}
 
 		private string BuildPropertyName(ValidationContext<T> context) {
-			return context.PropertyChain.BuildPropertyName(PropertyName ?? CustomPropertyName);
+			return context.PropertyChain.BuildPropertyName(PropertyName ?? CustomPropertyName.GetString());
 		}
 	}
 }

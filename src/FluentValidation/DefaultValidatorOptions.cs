@@ -85,7 +85,7 @@ namespace FluentValidation {
 			errorMessage.Guard("A message must be specified when calling WithMessage.");
 
 			return rule.Configure(config => {
-				config.CurrentValidator.ErrorMessageSource = new StringErrorMessageSource(errorMessage);
+				config.CurrentValidator.ErrorMessageSource = new StaticStringSource(errorMessage);
 
 				funcs
 					.Select(func => new Func<object, object>(x => func((T)x)))
@@ -100,11 +100,23 @@ namespace FluentValidation {
 		/// <param name="resourceSelector">The resource to use as an expression, eg () => Messages.MyResource</param>
 		/// <returns></returns>
 		public static IRuleBuilderOptions<T,TProperty> WithLocalizedMessage<T,TProperty>(this IRuleBuilderOptions<T,TProperty> rule, Expression<Func<string>> resourceSelector) {
+			// We use the StaticResourceAccessorBuilder here because we don't want calls to WithLocalizedMessage to be overriden by the ResourceProviderType.
+			return rule.WithLocalizedMessage(resourceSelector, new StaticResourceAccessorBuilder());
+		}
+
+
+		/// <summary>
+		/// Specifies a custom error message resource to use when validation fails.
+		/// </summary>
+		/// <param name="rule">The current rule</param>
+		/// <param name="resourceSelector">The resource to use as an expression, eg () => Messages.MyResource</param>
+		/// <param name="resourceAccessorBuilder">The resource accessor builder to use. </param>
+		/// <returns></returns>
+		public static IRuleBuilderOptions<T,TProperty> WithLocalizedMessage<T,TProperty>(this IRuleBuilderOptions<T,TProperty> rule, Expression<Func<string>> resourceSelector, IResourceAccessorBuilder resourceAccessorBuilder) {
 			resourceSelector.Guard("An expression must be specified when calling WithLocalizedMessage, eg .WithLocalizedMessage(() => Messages.MyResource)");
 		
 			return rule.Configure(config => {
-				// We use the StaticResourceAccessorBuilder here because we don't want calls to WithLocalizedMessage to be overriden by the ResourceProviderType.
-				config.CurrentValidator.ErrorMessageSource = LocalizedErrorMessageSource.CreateFromExpression(resourceSelector, new StaticResourceAccessorBuilder());
+				config.CurrentValidator.ErrorMessageSource = LocalizedStringSource.CreateFromExpression(resourceSelector, resourceAccessorBuilder);
 			});
 		}
 
@@ -179,20 +191,59 @@ namespace FluentValidation {
 		/// <returns></returns>
 		public static IRuleBuilderOptions<T, TProperty> WithName<T, TProperty>(this IRuleBuilderOptions<T, TProperty> rule, string overridePropertyName) {
 			overridePropertyName.Guard("A property name must be specified when calling WithName.");
-			return rule.Configure(config => config.CustomPropertyName = overridePropertyName);
+			return rule.Configure(config => {
+				config.CustomPropertyName = new StaticStringSource(overridePropertyName);	
+			});
 		}
 
 		/// <summary>
-		/// Specifies a custom property name.
+		/// Specifies a localized name for the error message. 
+		/// </summary>
+		/// <param name="rule">The current rule</param>
+		/// <param name="resourceSelector">The resource to use as an expression, eg () => Messages.MyResource</param>
+		public static IRuleBuilderOptions<T, TProperty> WithLocalizedName<T,TProperty>(this IRuleBuilderOptions<T,TProperty> rule, Expression<Func<string>> resourceSelector) {
+			// default to the static resource accessor builder - explicit resources configured with WithLocalizedName should take precedence over ResourceProviderType.
+			return rule.WithLocalizedName(resourceSelector, new StaticResourceAccessorBuilder());
+		}
+
+		/// <summary>
+		/// Specifies a localized name for the error message. 
+		/// </summary>
+		/// <param name="rule">The current rule</param>
+		/// <param name="resourceSelector">The resource to use as an expression, eg () => Messages.MyResource</param>
+		/// <param name="resourceAccessorBuilder">Resource accessor builder to use</param>
+		public static IRuleBuilderOptions<T, TProperty> WithLocalizedName<T,TProperty>(this IRuleBuilderOptions<T,TProperty> rule, Expression<Func<string>> resourceSelector, IResourceAccessorBuilder resourceAccessorBuilder) {
+			resourceSelector.Guard("A resource selector must be specified.");
+			resourceAccessorBuilder.Guard("A resource accessor builder must be specified.");
+			
+			return rule.Configure(config => {
+				config.CustomPropertyName = LocalizedStringSource.CreateFromExpression(resourceSelector, resourceAccessorBuilder);
+			});
+		}
+
+		/// <summary>
+		/// Overrides the name of the property associated with this rule.
+		/// NOTE: This is a considered to be an advanced feature. 99% of the time that you use this, you actually meant to use WithName.
 		/// </summary>
 		/// <param name="rule">The current rule</param>
 		/// <param name="propertyName">The property name to use</param>
 		/// <returns></returns>
-		public static IRuleBuilderOptions<T, TProperty> WithPropertyName<T, TProperty>(this IRuleBuilderOptions<T, TProperty> rule, string propertyName) {
+		public static IRuleBuilderOptions<T, TProperty> OverridePropertyName<T, TProperty>(this IRuleBuilderOptions<T, TProperty> rule, string propertyName) {
 			propertyName.Guard("A property name must be specified when calling WithNamePropertyName.");
 			return rule.Configure(config => config.PropertyName = propertyName);
 		}
 
+		/// <summary>
+		/// Overrides the name of the property associated with this rule.
+		/// NOTE: This is a considered to be an advanced feature. 99% of the time that you use this, you actually meant to use WithName.
+		/// </summary>
+		/// <param name="rule">The current rule</param>
+		/// <param name="propertyName">The property name to use</param>
+		/// <returns></returns>
+		[Obsolete("WithPropertyName has been deprecated. If you wish to set the name of the property within the error message, use 'WithName'. If you actually intended to change which property this rule was declared against, use 'OverridePropertyName' instead.")]
+		public static IRuleBuilderOptions<T, TProperty> WithPropertyName<T, TProperty>(this IRuleBuilderOptions<T, TProperty> rule, string propertyName) {
+			return rule.OverridePropertyName(propertyName);
+		}
 
 		/// <summary>
 		/// Specifies custom state that should be stored alongside the validation message when validation fails for this rule.
