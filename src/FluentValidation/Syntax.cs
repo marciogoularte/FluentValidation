@@ -70,7 +70,7 @@ namespace FluentValidation {
         IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TValidator>() where TValidator : IValidator;
 
         /// <summary>
-        /// Sets the validator associated with the rule. Use with complex properties where a Property Validator is already declared for the property type.
+        /// Sets the validator associated with the rule. Use with simple properties where a Property Validator is already declared for the property type.
         /// </summary>
         /// <typeparam name="TValidator">The validator to use</typeparam>
         /// <returns></returns>

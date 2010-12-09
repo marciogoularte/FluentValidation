@@ -96,7 +96,7 @@ namespace FluentValidation.Internal {
         }
 
         /// <summary>
-        /// Sets the validator associated with the rule. Use with complex properties where a Property Validator is already declared for the property type.
+        /// Sets the validator associated with the rule. Use with simple properties where a Property Validator is already declared for the property type.
         /// </summary>
         /// <typeparam name="TValidator">The validator to set</typeparam>
 	    public IRuleBuilderOptions<T, TProperty> Using<TValidator>() where TValidator : IPropertyValidator {
