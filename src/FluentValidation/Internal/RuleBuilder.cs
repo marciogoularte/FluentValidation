@@ -65,6 +65,18 @@ namespace FluentValidation.Internal {
 		}
 
         /// <summary>
+        /// Sets the validator associated with the rule. Use with complex properties where an IValidator instance is already declared for the property type.
+        /// </summary>
+        /// <typeparam name="TValidator">The validator to set</typeparam>
+        public IRuleBuilderOptions<T, TProperty> SetValidator<TValidator>() where TValidator : IValidator
+        {
+            var validator = (IValidator)constructor(typeof(TValidator));
+            validator.Guard("Cannot pass a null validator to SetValidator");
+            SetValidator(Extensions.InferPropertyValidatorForChildValidator(Rule, validator));
+            return this;
+        }
+
+        /// <summary>
         /// Uses the validator specified to extract the rule
         /// </summary>
         /// <typeparam name="TModel">The model to extract property name</typeparam>
@@ -84,11 +96,11 @@ namespace FluentValidation.Internal {
         }
 
         /// <summary>
-        /// Sets the validator associated with the rule. Use with complex properties where an IValidator instance is already declared for the property type.
+        /// Sets the validator associated with the rule. Use with complex properties where a Property Validator is already declared for the property type.
         /// </summary>
         /// <typeparam name="TValidator">The validator to set</typeparam>
-	    public IRuleBuilderOptions<T, TProperty> Using<TValidator>() where TValidator : IValidator {
-	        var validator = (IValidator)constructor(typeof (TValidator));
+	    public IRuleBuilderOptions<T, TProperty> Using<TValidator>() where TValidator : IPropertyValidator {
+            var validator = (IPropertyValidator)constructor(typeof(TValidator));
 	        SetValidator(validator);
             return this;
 	    }
