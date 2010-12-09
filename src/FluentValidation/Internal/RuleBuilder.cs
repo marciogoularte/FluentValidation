@@ -71,8 +71,7 @@ namespace FluentValidation.Internal {
         public IRuleBuilderOptions<T, TProperty> SetValidator<TValidator>() where TValidator : IValidator
         {
             var validator = (IValidator)constructor(typeof(TValidator));
-            validator.Guard("Cannot pass a null validator to SetValidator");
-            SetValidator(Extensions.InferPropertyValidatorForChildValidator(Rule, validator));
+            SetValidator(validator);
             return this;
         }
 
