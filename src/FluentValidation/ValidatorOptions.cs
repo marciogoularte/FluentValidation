@@ -23,7 +23,8 @@ namespace FluentValidation {
 	public static class ValidatorOptions {
 		public static CascadeMode CascadeMode = CascadeMode.Continue;
 		public static Type ResourceProviderType;
-
+        
+        private static Func<Type, object> instanceActivator = Activator.CreateInstance;
 		private static Func<Type, MemberInfo, string> propertyNameResolver = DefaultPropertyNameResolver;
 
 		public static Func<Type, MemberInfo, string> PropertyNameResolver {
@@ -38,5 +39,10 @@ namespace FluentValidation {
 
 			return null;
 		}
+    
+        public static Func<Type, object> InstanceActivator { 
+            get { return instanceActivator; }
+            set { instanceActivator = value; }
+        }
 	}
 }

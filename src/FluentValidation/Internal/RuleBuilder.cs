@@ -28,7 +28,7 @@ namespace FluentValidation.Internal {
 	/// <typeparam name="TProperty">Type of property being validated</typeparam>
 	public class RuleBuilder<T, TProperty> : IRuleBuilderOptions<T, TProperty>, IRuleBuilderInitial<T, TProperty> {
 		readonly PropertyRule<T> rule;
-	    readonly Func<Type, object> constructor;
+        readonly Func<Type, object> instanceActivator = ValidatorOptions.InstanceActivator;
 
 		public PropertyRule<T> Rule {
 			get { return rule; }
@@ -37,10 +37,9 @@ namespace FluentValidation.Internal {
 		/// <summary>
 		/// Creates a new instance of the <see cref="RuleBuilder{T,TProperty}">RuleBuilder</see> class.
 		/// </summary>
-        public RuleBuilder(PropertyRule<T> rule, Func<Type, object> constructor)
+        public RuleBuilder(PropertyRule<T> rule)
         {
 			this.rule = rule;
-		    this.constructor = constructor;
 		}
 
 		/// <summary>
@@ -65,54 +64,16 @@ namespace FluentValidation.Internal {
 		}
 
         /// <summary>
-        /// Sets the validator associated with the rule. Use with complex properties where an IValidator instance is already declared for the property type.
+        /// Sets the validator associated with the rule. Use with complex properties where an IValidator or IPropertyValidator instance is already declared for the property type.
         /// </summary>
         /// <typeparam name="TValidator">The validator to set</typeparam>
-        public IRuleBuilderOptions<T, TProperty> SetValidator<TValidator>() where TValidator : IValidator
-        {
-            var validator = (IValidator)constructor(typeof(TValidator));
-            SetValidator(validator);
+        public IRuleBuilderOptions<T, TProperty> SetValidator<TValidator>() {
+            var type = typeof(TValidator);
+            if (type is IValidator)
+                SetValidator((IValidator)instanceActivator(type));
+            else if (type is IPropertyValidator)
+                SetValidator((IPropertyValidator)instanceActivator(type));
             return this;
-        }
-
-        /// <summary>
-        /// Uses the validator specified to extract the rule
-        /// </summary>
-        /// <typeparam name="TModel">The model to extract property name</typeparam>
-        /// <typeparam name="TValidator">The validator to extract property from</typeparam>
-        public IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TModel, TValidator>(Expression<Func<TModel, TProperty>> expression) where TValidator : IValidator<TModel> {
-            AddValidators<TValidator>(expression.GetMember().Name);
-            return this;
-        }
-
-        /// <summary>
-        /// Uses the validator specified to extract the rule
-        /// </summary>
-        /// <typeparam name="TValidator">The validator to extract property from using the same name</typeparam>
-        public IRuleBuilderOptions<T, TProperty> UsingRuleFrom<TValidator>() where TValidator : IValidator {
-            AddValidators<TValidator>(rule.PropertyName);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the validator associated with the rule. Use with simple properties where a Property Validator is already declared for the property type.
-        /// </summary>
-        /// <typeparam name="TValidator">The validator to set</typeparam>
-	    public IRuleBuilderOptions<T, TProperty> Using<TValidator>() where TValidator : IPropertyValidator {
-            var validator = (IPropertyValidator)constructor(typeof(TValidator));
-	        SetValidator(validator);
-            return this;
-	    }
-
-	    private void AddValidators<TValidator>(string name) where TValidator : IValidator {
-            var validator = (IValidator)constructor(typeof(TValidator));
-            var descriptor = validator.CreateDescriptor();
-            var validators = descriptor.GetValidatorsForMember(name);
-
-            foreach (var val in validators)
-            {
-                SetValidator(val);
-            }
         }
 
 		IRuleBuilderOptions<T, TProperty> IConfigurable<PropertyRule<T>, IRuleBuilderOptions<T, TProperty>>.Configure(Action<PropertyRule<T>> configurator) {
