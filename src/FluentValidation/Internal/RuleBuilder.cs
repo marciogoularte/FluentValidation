@@ -68,11 +68,11 @@ namespace FluentValidation.Internal {
         /// </summary>
         /// <typeparam name="TValidator">The validator to set</typeparam>
         public IRuleBuilderOptions<T, TProperty> SetValidator<TValidator>() {
-            var type = typeof(TValidator);
-            if (type is IValidator)
-                SetValidator((IValidator)instanceActivator(type));
-            else if (type is IPropertyValidator)
-                SetValidator((IPropertyValidator)instanceActivator(type));
+            var instance = instanceActivator(typeof(TValidator));
+            if (instance as IValidator != null)
+                SetValidator((IValidator)instance);
+            else if (instance as IPropertyValidator != null)
+                SetValidator((IPropertyValidator)instance);
             return this;
         }
 

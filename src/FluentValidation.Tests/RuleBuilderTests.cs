@@ -61,6 +61,30 @@ namespace FluentValidation.Tests {
 			builder.Rule.CurrentValidator.ShouldBeTheSameAs(validator);
 		}
 
+        [Test]
+        public void Adding_a_validator_should_store_validator_using_generic_type_overload() {
+            builder.SetValidator<TestPropertyValidator>();
+            builder.Rule.CurrentValidator.ShouldBe<TestPropertyValidator>();
+        }
+
+        [Test]
+        public void Adding_a_validator_should_store_validator_using_generic_type_overload_returns_childadapter() {
+            builder.SetValidator<SurnameValidator>();
+            builder.Rule.CurrentValidator.ShouldBe<ChildValidatorAdaptor>();
+        }
+
+        [Test]
+        public void Adding_a_validator_should_store_validator_using_custom_instance_activator()
+        {
+            var fakeActivator = new Dictionary<Type, object> { { typeof(TestPropertyValidator), new TestPropertyValidator() } };
+            ValidatorOptions.InstanceActivator = x => fakeActivator[x];
+
+            builder.SetValidator<TestPropertyValidator>();
+            builder.Rule.CurrentValidator.ShouldBe<TestPropertyValidator>();
+            
+            ValidatorOptions.InstanceActivator = Activator.CreateInstance;
+        }
+
 		[Test]
 		public void Should_set_cutom_property_name() {
 			builder.SetValidator(new TestPropertyValidator()).WithName("Foo");
@@ -189,6 +213,12 @@ namespace FluentValidation.Tests {
 			protected override bool IsValid(PropertyValidatorContext context) {
 				return true;
 			}
+		}
+
+        class SurnameValidator : AbstractValidator<string> {
+            public SurnameValidator() {
+                RuleFor(x => x).NotEmpty();
+            }
 		}
 	}
 }
