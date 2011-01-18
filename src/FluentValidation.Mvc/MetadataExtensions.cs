@@ -94,7 +94,11 @@ namespace FluentValidation.Mvc.MetadataExtensions {
 
 			}
 
-			public IDisplayFormatBuilder<T, TProperty> NullDisplayText(string text) {
+		    public IRuleBuilderOptions<T, TProperty> SetValidator<TValidator>() {
+		        return builder.SetValidator<TValidator>();
+		    }
+
+		    public IDisplayFormatBuilder<T, TProperty> NullDisplayText(string text) {
 				attribute.NullDisplayText = text;
 				return this;
 			}
