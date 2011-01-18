@@ -231,6 +231,8 @@ namespace FluentValidation {
 		/// <returns></returns>
 		public static IRuleBuilderOptions<T, TProperty> Must<T, TProperty>(this IRuleBuilder<T, TProperty> ruleBuilder,
 		                                                                   Func<TProperty, bool> predicate) {
+			predicate.Guard("Cannot pass a null predicate to Must.");
+
 			return ruleBuilder.Must((x, val) => predicate(val));
 		}
 
@@ -247,6 +249,8 @@ namespace FluentValidation {
 		/// <returns></returns>
 		public static IRuleBuilderOptions<T, TProperty> Must<T, TProperty>(this IRuleBuilder<T, TProperty> ruleBuilder,
 		                                                                   Func<T, TProperty, bool> predicate) {
+			predicate.Guard("Cannot pass a null predicate to Must.");
+
 			return ruleBuilder.SetValidator(new PredicateValidator((instance, property) => predicate((T)instance, (TProperty)property)));
 		}
 
@@ -324,6 +328,8 @@ namespace FluentValidation {
 		public static IRuleBuilderOptions<T, TProperty> LessThan<T, TProperty>(this IRuleBuilder<T, TProperty> ruleBuilder,
 		                                                                       Expression<Func<T, TProperty>> expression)
 			where TProperty : IComparable<TProperty>, IComparable {
+			expression.Guard("Cannot pass null to LessThan");
+
 			var func = expression.Compile();
 			PropertySelector selector = x => func((T)x);
 
@@ -396,7 +402,7 @@ namespace FluentValidation {
 		/// <param name="propertyExpressions">Expressions to specify the properties to validate</param>
 		/// <returns>A ValidationResult object containing any validation failures</returns>
 		public static ValidationResult Validate<T>(this IValidator<T> validator, T instance, params Expression<Func<T, object>>[] propertyExpressions) {
-			var context = new ValidationContext<T>(instance, new PropertyChain(), MemberValidatorSelector.FromExpressions(propertyExpressions));
+			var context = new ValidationContext<T>(instance, new PropertyChain(), MemberNameValidatorSelector.FromExpressions(propertyExpressions));
 			return validator.Validate(context);
 		}
 
