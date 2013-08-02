@@ -21,14 +21,13 @@ namespace FluentValidation {
 	using System.Collections.Generic;
 	using Internal;
 	using Validators;
-    using System.Linq.Expressions;
 
 	/// <summary>
 	/// Rule builder that starts the chain
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <typeparam name="TProperty"></typeparam>
-	public interface IRuleBuilderInitial<T, TProperty> : IFluentInterface, IRuleBuilder<T, TProperty>, IConfigurable<PropertyRule<T>, IRuleBuilderInitial<T, TProperty>> {
+	public interface IRuleBuilderInitial<T, out TProperty> : IFluentInterface, IRuleBuilder<T, TProperty>, IConfigurable<PropertyRule, IRuleBuilderInitial<T, TProperty>> {
 	}
 
 	/// <summary>
@@ -36,7 +35,7 @@ namespace FluentValidation {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <typeparam name="TProperty"></typeparam>
-	public interface IRuleBuilder<T, TProperty> : IFluentInterface {
+	public interface IRuleBuilder<T, out TProperty> : IFluentInterface {
 		/// <summary>
 		/// Associates a validator with this the property for this rule builder.
 		/// </summary>
@@ -48,14 +47,14 @@ namespace FluentValidation {
 		/// Associates an instance of IValidator with the current property rule.
 		/// </summary>
 		/// <param name="validator">The validator to use</param>
+		[Obsolete("This overload of SetValidator is no longer used. If you are trying to set a child validator for a collection, use SetCollectionValidator instead.")]
 		IRuleBuilderOptions<T, TProperty> SetValidator(IValidator validator);
 
-	    /// <summary>
-	    /// Sets the validator associated with the rule. Use with complex properties where an IValidator or IPropertyValidator instance is already declared for the property type.
-	    /// </summary>
-	    /// <typeparam name="TValidator">The validator to set</typeparam>
-	    IRuleBuilderOptions<T, TProperty> SetValidator<TValidator>();
-
+		/// <summary>
+		/// Associates an instance of IValidator with the current property rule.
+		/// </summary>
+		/// <param name="validator">The validator to use</param>
+		IRuleBuilderOptions<T, TProperty> SetValidator(IValidator<TProperty> validator);
 	}
 
 
@@ -64,7 +63,7 @@ namespace FluentValidation {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <typeparam name="TProperty"></typeparam>
-	public interface IRuleBuilderOptions<T, TProperty> : IRuleBuilder<T, TProperty>, IConfigurable<PropertyRule<T>, IRuleBuilderOptions<T, TProperty>> {
+	public interface IRuleBuilderOptions<T, out TProperty> : IRuleBuilder<T, TProperty>, IConfigurable<PropertyRule, IRuleBuilderOptions<T, TProperty>> {
 
 	}
 }

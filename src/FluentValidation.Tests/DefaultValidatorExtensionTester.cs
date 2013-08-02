@@ -91,6 +91,17 @@ namespace FluentValidation.Tests {
 			AssertValidator<PredicateValidator>();
 		}
 
+        [Test]
+        public void Must_should_create_PredicateValidator_with_PropertyValidatorContext() {
+            var hasPropertyValidatorContext = false;
+            validator.RuleFor(x => x.Surname).Must((x, val, ctx) => {
+                hasPropertyValidatorContext = ctx != null;
+                return true; });
+            validator.Validate(new Person() {Surname = "Surname"});
+            AssertValidator<PredicateValidator>();
+            hasPropertyValidatorContext.ShouldBeTrue();
+        }
+
 		[Test]
 		public void LessThan_should_create_LessThanValidator_with_explicit_value() {
 			validator.RuleFor(x => x.Surname).LessThan("foo");
@@ -114,6 +125,12 @@ namespace FluentValidation.Tests {
 			validator.RuleFor(x => x.Surname).LessThanOrEqualTo(x => "foo");
 			AssertValidator<LessThanOrEqualValidator>();
 		}
+
+    [Test]
+    public void LessThanOrEqual_should_create_LessThanOrEqualValidator_with_lambda_with_other_Nullable() {
+      validator.RuleFor(x => x.NullableInt).LessThanOrEqualTo(x => x.OtherNullableInt);
+      AssertValidator<LessThanOrEqualValidator>();
+    }
 
 		[Test]
 		public void GreaterThan_should_create_GreaterThanValidator_with_explicit_value() {
@@ -139,8 +156,14 @@ namespace FluentValidation.Tests {
 			AssertValidator<GreaterThanOrEqualValidator>();
 		}
 
+    [Test]
+    public void GreaterThanOrEqual_should_create_GreaterThanOrEqualValidator_with_lambda_with_other_Nullable() {
+      validator.RuleFor(x => x.NullableInt).GreaterThanOrEqualTo(x => x.OtherNullableInt);
+      AssertValidator<GreaterThanOrEqualValidator>();
+    }
+
 		private void AssertValidator<TValidator>() {
-			var rule = (PropertyRule<Person>)validator.First();
+			var rule = (PropertyRule)validator.First();
 			rule.CurrentValidator.ShouldBe<TValidator>();
 		}
 	}

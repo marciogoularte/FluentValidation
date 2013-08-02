@@ -25,14 +25,14 @@ namespace FluentValidation.Validators {
 
 	public class GreaterThanValidator : AbstractComparisonValidator {
 		public GreaterThanValidator(IComparable value) : base(value, () => Messages.greaterthan_error) {
-			SupportsStandaloneValidation = true;
 		}
 
-		public GreaterThanValidator(PropertySelector valueToCompareFunc, MemberInfo member) : base(valueToCompareFunc, member, () => Messages.greaterthan_error) {
+		public GreaterThanValidator(Func<object, object> valueToCompareFunc, MemberInfo member)
+			: base(valueToCompareFunc, member, () => Messages.greaterthan_error) {
 		}
 
 		public override bool IsValid(IComparable value, IComparable valueToCompare) {
-			return value.CompareTo(valueToCompare) > 0;
+			return Comparer.GetComparisonResult(value, valueToCompare) > 0;
 		}
 
 		public override Comparison Comparison {

@@ -19,6 +19,7 @@
 namespace FluentValidation.Validators {
 	using System;
 	using Attributes;
+	using Internal;
 	using Resources;
 
 	public class ExclusiveBetweenValidator : PropertyValidator, IBetweenValidator {
@@ -26,10 +27,9 @@ namespace FluentValidation.Validators {
 			To = to;
 			From = from;
 
-			if (to.CompareTo(from) == -1) {
+			if (Comparer.GetComparisonResult(to, from) == -1) {
 				throw new ArgumentOutOfRangeException("to", "To should be larger than from.");
 			}
-			SupportsStandaloneValidation = true;
 		}
 
 		public IComparable From { get; private set; }
@@ -39,7 +39,11 @@ namespace FluentValidation.Validators {
 		protected override bool IsValid(PropertyValidatorContext context) {
 			var propertyValue = (IComparable)context.PropertyValue;
 
-			if (propertyValue.CompareTo(From) <= 0 || propertyValue.CompareTo(To) >= 0) {
+			// If the value is null then we abort and assume success.
+			// This should not be a failure condition - only a NotNull/NotEmpty should cause a null to fail.
+			if (propertyValue == null) return true;
+
+			if (Comparer.GetComparisonResult(propertyValue, From) <= 0 || Comparer.GetComparisonResult(propertyValue, To) >= 0) {
 
 				context.MessageFormatter
 					.AppendArgument("From", From)

@@ -94,17 +94,11 @@ namespace FluentValidation.Tests {
 			result.IsValid.ShouldBeFalse();
 		}
 
-
-		private NotEqualValidator CreateValidator<T>(Expression<PropertySelector<Person, T>> expression) {
-			var func = expression.Compile();
-			PropertySelector selector = x => func((Person)x);
-			return new NotEqualValidator(selector, expression.GetMember());
-		}
-
-		private NotEqualValidator CreateValidator<T>(Expression<PropertySelector<Person, T>> expression, IEqualityComparer equalityComparer) {
-			var func = expression.Compile();
-			PropertySelector selector = x => func((Person)x);
-			return new NotEqualValidator(selector, expression.GetMember(), equalityComparer);
+		[Test]
+		public void Should_not_be_valid_for_case_insensitve_comparison_with_expression() {
+			var validator = new TestValidator(v => v.RuleFor(x => x.Forename).NotEqual(x => x.Surname, StringComparer.OrdinalIgnoreCase));
+			var result = validator.Validate(new Person { Forename = "foo", Surname = "FOO"});
+			result.IsValid.ShouldBeFalse();
 		}
 	}
 }

@@ -50,13 +50,31 @@ namespace FluentValidation.Tests {
 
 		[Test]
 		public void Perserves_property_chain_using_custom() {
-			validator.RuleFor(x => x.Orders).SetValidator(new NestedOrderValidator());
+			validator.RuleFor(x => x.Orders).SetCollectionValidator(new NestedOrderValidator());
 			var person = new Person();
 			person.Orders.Add(new Order());
 			var result = validator.Validate(person);
 
 			result.Errors.Single().PropertyName.ShouldEqual("Orders[0].Amount");
 		}
+
+	    [Test]
+	    public void Customm_within_ruleset() {
+            var validator = new InlineValidator<Person>();
+            validator.RuleSet("foo", () => {
+                validator.Custom(x => {
+                    return new ValidationFailure("x", "y");
+                });
+            });
+            validator.RuleSet("bar", () => {
+                validator.Custom(x => {
+                    return new ValidationFailure("x", "y");
+                });
+            });
+
+            var result = validator.Validate(new Person(), ruleSet: "foo");
+            result.Errors.Count.ShouldEqual(1);
+	    }
 
 		private class NestedOrderValidator : AbstractValidator<Order> {
 			public NestedOrderValidator() {

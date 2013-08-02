@@ -33,17 +33,17 @@ namespace FluentValidation.Validators {
 			Max = max;
 			Min = min;
 
-			if (max < min) {
+			if (max != -1 && max < min) {
 				throw new ArgumentOutOfRangeException("max", "Max should be larger than min.");
 			}
-
-			SupportsStandaloneValidation = true;
 		}
 
 		protected override bool IsValid(PropertyValidatorContext context) {
-			int length = context.PropertyValue == null ? 0 : context.PropertyValue.ToString().Length;
+			if (context.PropertyValue == null) return true;
 
-			if (length < Min || length > Max) {
+			int length = context.PropertyValue.ToString().Length;
+
+			if (length < Min || (length > Max && Max != -1)) {
 				context.MessageFormatter
 					.AppendArgument("MinLength", Min)
 					.AppendArgument("MaxLength", Max)
@@ -61,6 +61,28 @@ namespace FluentValidation.Validators {
 			
 		}
 	}
+
+    public class MaximumLengthValidator : LengthValidator {
+        public MaximumLengthValidator(int max) : this(max, () => Messages.length_error) {
+
+        }
+
+        public MaximumLengthValidator(int max, Expression<Func<string>> errorMessageResourceSelector)
+            : base(0, max, errorMessageResourceSelector) {
+
+        }
+    }
+
+    public class MinimumLengthValidator : LengthValidator {
+        public MinimumLengthValidator(int min) : this(min, () => Messages.length_error) {
+
+        }
+
+        public MinimumLengthValidator(int min, Expression<Func<string>> errorMessageResourceSelector) 
+            : base(min, -1, errorMessageResourceSelector) {
+
+        }
+    }
 
 	public interface ILengthValidator : IPropertyValidator {
 		int Min { get; }

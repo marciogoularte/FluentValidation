@@ -17,7 +17,7 @@ namespace FluentValidation.Validators {
 		}
 
 		public override IEnumerable<ValidationFailure> Validate(PropertyValidatorContext context) {
-			if (context.Member == null) {
+			if (context.Rule.Member == null) {
 				throw new InvalidOperationException(string.Format("Nested validators can only be used with Member Expressions."));
 			}
 
@@ -44,14 +44,9 @@ namespace FluentValidation.Validators {
 		}
 
 		protected ValidationContext CreateNewValidationContextForChildValidator(object instanceToValidate, PropertyValidatorContext context) {
-			return CreateNewValidationContextForChildValidator(instanceToValidate, context, new DefaultValidatorSelector());
-		}
-
-		protected ValidationContext CreateNewValidationContextForChildValidator(object instanceToValidate, PropertyValidatorContext propertyValidatorContext, IValidatorSelector validatorSelector) {
-			var propertyChain = new PropertyChain(propertyValidatorContext.PropertyChain);
-			propertyChain.Add(propertyValidatorContext.Member);
-
-			return new ValidationContext(instanceToValidate, propertyChain, validatorSelector);
+			var newContext = context.ParentContext.CloneForChildValidator(instanceToValidate);
+			newContext.PropertyChain.Add(context.Rule.PropertyName);
+			return newContext;
 		}
 	}
 }

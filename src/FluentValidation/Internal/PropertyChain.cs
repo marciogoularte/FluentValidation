@@ -20,6 +20,7 @@ namespace FluentValidation.Internal {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Linq.Expressions;
 	using System.Reflection;
 
 	/// <summary>
@@ -28,13 +29,44 @@ namespace FluentValidation.Internal {
 	public class PropertyChain {
 		readonly List<string> memberNames = new List<string>();
 
+		/// <summary>
+		/// Creates a new PropertyChain.
+		/// </summary>
 		public PropertyChain() {
 		}
 
+		/// <summary>
+		/// Creates a new PropertyChain based on another.
+		/// </summary>
 		public PropertyChain(PropertyChain parent) {
 			if(parent != null) {
 				memberNames.AddRange(parent.memberNames);				
 			}
+		}
+
+		public PropertyChain(IEnumerable<string> memberNames) {
+			this.memberNames.AddRange(memberNames);
+		}
+
+		public static PropertyChain FromExpression(LambdaExpression expression) {
+			var memberNames = new Stack<string>();
+
+			var getMemberExp = new Func<Expression, MemberExpression>(toUnwrap => {
+				if (toUnwrap is UnaryExpression) {
+					return ((UnaryExpression)toUnwrap).Operand as MemberExpression;
+				}
+
+				return toUnwrap as MemberExpression;
+			});
+
+			var memberExp = getMemberExp(expression.Body);
+
+			while(memberExp != null) {
+				memberNames.Push(memberExp.Member.Name);
+				memberExp = getMemberExp(memberExp.Expression);
+			}
+
+			return new PropertyChain(memberNames);
 		}
 
 		/// <summary>
@@ -71,6 +103,9 @@ namespace FluentValidation.Internal {
 			memberNames[memberNames.Count - 1] = last;
 		}
 
+		/// <summary>
+		/// Creates a string representation of a property chain.
+		/// </summary>
 		public override string ToString() {
 			return string.Join(".", memberNames.ToArray());
 		}
@@ -86,10 +121,17 @@ namespace FluentValidation.Internal {
 			return ToString().StartsWith(parentChain.ToString());
 		}
 
+		/// <summary>
+		/// Builds a property path.
+		/// </summary>
 		public string BuildPropertyName(string propertyName) {
 			var chain = new PropertyChain(this);
 			chain.Add(propertyName);
 			return chain.ToString();
+		}
+
+		public int Count {
+			get { return memberNames.Count; }
 		}
 	}
 }

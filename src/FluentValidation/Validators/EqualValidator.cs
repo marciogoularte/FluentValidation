@@ -17,6 +17,7 @@
 #endregion
 
 namespace FluentValidation.Validators {
+	using System;
 	using System.Collections;
 	using System.Reflection;
 	using Attributes;
@@ -24,28 +25,26 @@ namespace FluentValidation.Validators {
 	using Resources;
 
 	public class EqualValidator : PropertyValidator, IComparisonValidator {
-		readonly PropertySelector func;
+		readonly Func<object, object> func;
 		readonly IEqualityComparer comparer;
 
 		public EqualValidator(object valueToCompare) : base(() => Messages.equal_error) {
 			this.ValueToCompare = valueToCompare;
-			SupportsStandaloneValidation = true;
 		}
 
 		public EqualValidator(object valueToCompare, IEqualityComparer comparer)
 			: base(() => Messages.equal_error) {
 			ValueToCompare = valueToCompare;
 			this.comparer = comparer;
-			SupportsStandaloneValidation = true;
 		}
 
-		public EqualValidator(PropertySelector comparisonProperty, MemberInfo member)
+		public EqualValidator(Func<object, object> comparisonProperty, MemberInfo member)
 			: base(() => Messages.equal_error)  {
 			func = comparisonProperty;
 			MemberToCompare = member;
 		}
 
-		public EqualValidator(PropertySelector comparisonProperty, MemberInfo member, IEqualityComparer comparer)
+		public EqualValidator(Func<object, object> comparisonProperty, MemberInfo member, IEqualityComparer comparer)
 			: base(() => Messages.equal_error) {
 			func = comparisonProperty;
 			MemberToCompare = member;
@@ -57,7 +56,7 @@ namespace FluentValidation.Validators {
 			bool success = Compare(comparisonValue, context.PropertyValue);
 
 			if (!success) {
-				context.MessageFormatter.AppendArgument("PropertyValue", comparisonValue);
+				context.MessageFormatter.AppendArgument("ComparisonValue", comparisonValue);
 				return false;
 			}
 
@@ -84,7 +83,11 @@ namespace FluentValidation.Validators {
 				return comparer.Equals(comparisonValue, propertyValue);
 			}
 
-			return Equals(comparisonValue, propertyValue);
+			if (comparisonValue is IComparable && propertyValue is IComparable) {
+				return Internal.Comparer.GetEqualsResult((IComparable)comparisonValue, (IComparable)propertyValue);
+			}
+
+			return comparisonValue == propertyValue;
 		}
 	}
 }

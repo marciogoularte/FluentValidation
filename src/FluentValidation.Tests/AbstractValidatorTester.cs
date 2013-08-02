@@ -75,7 +75,7 @@ namespace FluentValidation.Tests {
 
 		[Test]
 		public void WithPropertyName_should_override_property_name() {
-			validator.RuleFor(x => x.Surname).NotNull().WithPropertyName("foo");
+			validator.RuleFor(x => x.Surname).NotNull().OverridePropertyName("foo");
 			var result = validator.Validate(new Person());
 			result.Errors[0].PropertyName.ShouldEqual("foo");
 		}
@@ -158,6 +158,27 @@ namespace FluentValidation.Tests {
 			var validator = (IValidator)this.validator;
 			validator.CanValidateInstancesOfType(typeof(Address)).ShouldBeFalse();
 		}
+
+		[Test]
+		public void Uses_named_parameters_to_validate_ruleset() {
+			validator.RuleSet("Names", () => {
+				validator.RuleFor(x => x.Surname).NotNull();
+				validator.RuleFor(x => x.Forename).NotNull();
+			});
+			validator.RuleFor(x => x.Id).NotEqual(0);
+
+			var result = validator.Validate(new Person(), ruleSet: "Names");
+			result.Errors.Count.ShouldEqual(2);
+		}
+
+		[Test]
+		public void Validates_type_when_using_non_generic_validate_overload() {
+			IValidator nonGenericValidator = validator;
+
+			typeof(InvalidOperationException).ShouldBeThrownBy(() =>
+				nonGenericValidator.Validate("foo"));
+		}
+
 
 		private class DerivedPerson : Person { }
 

@@ -79,6 +79,11 @@ namespace FluentValidation.Tests {
 		}
 
 		[Test]
+		public void Should_not_throw_when_value_to_compare_is_of_different_type() {
+		    new LessThanValidator(10M).IsValid(5M, 10).ShouldBeTrue();
+		}
+
+		[Test]
 		public void Extracts_property_from_expression() {
 			var validator = new TestValidator(v => v.RuleFor(x => x.Id).LessThan(x => x.AnotherInt));
 			var propertyValidator = validator.CreateDescriptor().GetValidatorsForMember("Id").OfType<LessThanValidator>().Single();
@@ -96,5 +101,33 @@ namespace FluentValidation.Tests {
 			var validator = new LessThanValidator(1);
 			validator.Comparison.ShouldEqual(Comparison.LessThan);
 		}
+
+		[Test]
+		public void Validates_with_nullable_when_property_is_null() {
+			var validator = new TestValidator(v => v.RuleFor(x => x.NullableInt).LessThan(5));
+			var result = validator.Validate(new Person());
+			result.IsValid.ShouldBeTrue();
+		}
+
+		[Test]
+		public void Validates_with_nullable_when_property_not_null() {
+			var validator = new TestValidator(v => v.RuleFor(x => x.NullableInt).LessThan(5));
+			var result = validator.Validate(new Person { NullableInt = 10 });
+			result.IsValid.ShouldBeFalse();
+		}
+
+	    [Test]
+	    public void Validates_with_nullable_when_property_null_cross_property() {
+	        var validator = new TestValidator(v => v.RuleFor(x => x.NullableInt).LessThan(x => x.Id));
+	        var result = validator.Validate(new Person {Id = 5});
+	        result.IsValid.ShouldBeTrue();
+	    }
+
+	    [Test]
+	    public void Validates_with_nullable_when_property_not_null_cross_property() {
+	        var validator = new TestValidator(v => v.RuleFor(x => x.NullableInt).LessThan(x => x.Id));
+	        var result = validator.Validate(new Person {NullableInt = 10, Id = 5});
+	        result.IsValid.ShouldBeFalse();
+	    }
 	}
 }

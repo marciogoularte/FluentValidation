@@ -30,10 +30,12 @@ namespace FluentValidation {
 	/// Base class for entity validator classes.
 	/// </summary>
 	/// <typeparam name="T">The type of the object being validated</typeparam>
-	public abstract class AbstractValidator<T> : IValidator<T>, IEnumerable<IValidationRule<T>> {
-		readonly List<IValidationRule<T>> nestedValidators = new List<IValidationRule<T>>();
+	public abstract class AbstractValidator<T> : IValidator<T>, IEnumerable<IValidationRule> {
+		readonly TrackingCollection<IValidationRule> nestedValidators = new TrackingCollection<IValidationRule>();
 
-		Func<CascadeMode> cascadeMode = () => ValidatorOptions.CascadeMode;
+        // Work-around for reflection bug in .NET 4.5
+        static Func<CascadeMode> s_cascadeMode = () => ValidatorOptions.CascadeMode;
+        Func<CascadeMode> cascadeMode = s_cascadeMode;
 
 		/// <summary>
 		/// Sets the cascade mode for all rules within this validator.
@@ -44,13 +46,22 @@ namespace FluentValidation {
 		}
 
 		ValidationResult IValidator.Validate(object instance) {
+			instance.Guard("Cannot pass null to Validate.");
+			if(! ((IValidator)this).CanValidateInstancesOfType(instance.GetType())) {
+				throw new InvalidOperationException(string.Format("Cannot validate instances of type '{0}'. This validator can only validate instances of type '{1}'.", instance.GetType().Name, typeof(T).Name));
+			}
+			
 			return Validate((T)instance);
 		}
 
 		ValidationResult IValidator.Validate(ValidationContext context) {
-			var genericContext = new ValidationContext<T>((T)context.InstanceToValidate, context.PropertyChain, context.Selector);
+			context.Guard("Cannot pass null to Validate");
 
-			return Validate(genericContext);
+			var newContext = new ValidationContext<T>((T)context.InstanceToValidate, context.PropertyChain, context.Selector) {
+				IsChildContext = context.IsChildContext
+			};
+
+			return Validate(newContext);
 		}
 
 		/// <summary>
@@ -73,10 +84,17 @@ namespace FluentValidation {
 			return new ValidationResult(failures);
 		}
 
-		public void AddRule(IValidationRule<T> rule) {
+		/// <summary>
+		/// Adds a rule to the current validator.
+		/// </summary>
+		/// <param name="rule"></param>
+		public void AddRule(IValidationRule rule) {
 			nestedValidators.Add(rule);
 		}
 
+		/// <summary>
+		/// Creates a <see cref="IValidatorDescriptor" /> that can be used to obtain metadata about the current validator.
+		/// </summary>
 		public virtual IValidatorDescriptor CreateDescriptor() {
 			return new ValidatorDescriptor<T>(nestedValidators);
 		}
@@ -96,11 +114,19 @@ namespace FluentValidation {
 		/// <returns>an IRuleBuilder instance on which validators can be defined</returns>
 		public IRuleBuilderInitial<T, TProperty> RuleFor<TProperty>(Expression<Func<T, TProperty>> expression) {
 			expression.Guard("Cannot pass null to RuleFor");
-			var rule = PropertyRule<T>.Create(expression, () => CascadeMode);
+			var rule = PropertyRule.Create(expression, () => CascadeMode);
 			AddRule(rule);
 			var ruleBuilder = new RuleBuilder<T, TProperty>(rule);
 			return ruleBuilder;
 		}
+
+		public IRuleBuilderInitial<T, TProperty> RuleForEach<TProperty>(Expression<Func<T, IEnumerable<TProperty>>> expression) {
+			expression.Guard("Cannot pass null to RuleForEach");
+			var rule = CollectionPropertyRule<TProperty>.Create(expression, () => CascadeMode);
+			AddRule(rule);
+			var ruleBuilder = new RuleBuilder<T, TProperty>(rule);
+			return ruleBuilder;
+		} 
 
 		/// <summary>
 		/// Defines a custom validation rule using a lambda expression.
@@ -124,7 +150,56 @@ namespace FluentValidation {
 			AddRule(new DelegateValidator<T>((x, ctx) => new[] { customValidator(x, ctx) }));
 		}
 
-		public IEnumerator<IValidationRule<T>> GetEnumerator() {
+		/// <summary>
+		/// Defines a RuleSet that can be used to group together several validators.
+		/// </summary>
+		/// <param name="ruleSetName">The name of the ruleset.</param>
+		/// <param name="action">Action that encapsulates the rules in the ruleset.</param>
+		public void RuleSet(string ruleSetName, Action action) {
+			ruleSetName.Guard("A name must be specified when calling RuleSet.");
+			action.Guard("A ruleset definition must be specified when calling RuleSet.");
+
+			using (nestedValidators.OnItemAdded(r => r.RuleSet = ruleSetName)) {
+				action();
+			}
+		}
+
+		/// <summary>
+		/// Defines a condition that applies to several rules
+		/// </summary>
+		/// <param name="predicate">The condition that should apply to multiple rules</param>
+		/// <param name="action">Action that encapsulates the rules.</param>
+		/// <returns></returns>
+		public void When(Func<T, bool> predicate, Action action) {
+			var propertyRules = new List<IValidationRule>();
+
+			Action<IValidationRule> onRuleAdded = propertyRules.Add;
+
+			using(nestedValidators.OnItemAdded(onRuleAdded)) {
+				action();
+			}
+
+			// Must apply the predictae after the rule has been fully created to ensure any rules-specific conditions have already been applied.
+			propertyRules.ForEach(x => x.ApplyCondition(predicate.CoerceToNonGeneric()));
+		}
+
+		/// <summary>
+		/// Defiles an inverse condition that applies to several rules
+		/// </summary>
+		/// <param name="predicate">The condition that should be applied to multiple rules</param>
+		/// <param name="action">Action that encapsulates the rules</param>
+		public void Unless(Func<T, bool> predicate, Action action) {
+			When(x => !predicate(x), action);
+		}
+
+		/// <summary>
+		/// Returns an enumerator that iterates through the collection of validation rules.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+		/// </returns>
+		/// <filterpriority>1</filterpriority>
+		public IEnumerator<IValidationRule> GetEnumerator() {
 			return nestedValidators.GetEnumerator();
 		}
 

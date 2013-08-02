@@ -21,13 +21,13 @@ namespace FluentValidation.Results {
 	using System.Collections.Generic;
 	using System.Linq;
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !PORTABLE
 	[Serializable]
 #endif
 	public class ValidationResult {
 		private readonly List<ValidationFailure> errors = new List<ValidationFailure>();
 
-		public bool IsValid {
+		public virtual bool IsValid {
 			get { return Errors.Count == 0; }
 		}
 

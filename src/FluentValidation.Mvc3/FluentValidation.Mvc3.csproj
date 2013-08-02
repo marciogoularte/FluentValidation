@@ -2,6 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -21,6 +22,7 @@
     <DefineConstants>TRACE;DEBUG;NET4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\FluentValidation.Mvc.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,9 +31,10 @@
     <DefineConstants>TRACE;NET4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\FluentValidation.Mvc.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\FluentValidation.snk</AssemblyOriginatorKeyFile>
@@ -40,6 +43,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Mvc, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\mvc\v3\System.Web.Mvc.dll</HintPath>
@@ -54,27 +58,20 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\FluentValidation.Mvc\AttributeMetadataValidator.cs">
-      <Link>AttributeMetadataValidator.cs</Link>
-    </Compile>
-    <Compile Include="..\FluentValidation.Mvc\FluentValidationModelMetadataProvider.cs">
-      <Link>FluentValidationModelMetadataProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\FluentValidation.Mvc\FluentValidationModelValidator.cs">
-      <Link>FluentValidationModelValidator.cs</Link>
-    </Compile>
-    <Compile Include="..\FluentValidation.Mvc\FluentValidationModelValidatorProvider.cs">
-      <Link>FluentValidationModelValidatorProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\FluentValidation.Mvc\FluentValidationPropertyValidator.cs">
-      <Link>FluentValidationPropertyValidator.cs</Link>
-    </Compile>
-    <Compile Include="..\FluentValidation.Mvc\MetadataExtensions.cs">
-      <Link>MetadataExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\FluentValidation.Mvc\ValidationResultExtension.cs">
-      <Link>ValidationResultExtension.cs</Link>
-    </Compile>
+    <Compile Include="CustomizeValidatorAttribute.cs" />
+    <Compile Include="FluentValidationModelValidator.cs" />
+    <Compile Include="FluentValidationModelValidatorProvider.cs" />
+    <Compile Include="PropertyValidatorAdapters\CreditCardFluentValidationPropertyValidator.cs" />
+    <Compile Include="PropertyValidatorAdapters\EmailFluentValidationPropertyValidator.cs" />
+    <Compile Include="PropertyValidatorAdapters\EqualToFluentValidationPropertyValidator.cs" />
+    <Compile Include="PropertyValidatorAdapters\FluentValidationPropertyValidator.cs" />
+    <Compile Include="IValidatorInterceptor.cs" />
+    <Compile Include="PropertyValidatorAdapters\RangeFluentValidationPropertyValidator.cs" />
+    <Compile Include="PropertyValidatorAdapters\RegularExpressionFluentValidationPropertyValidator.cs" />
+    <Compile Include="PropertyValidatorAdapters\RequiredFluentValidationPropertyValidator.cs" />
+    <Compile Include="PropertyValidatorAdapters\StringLengthFluentValidationPropertyValidator.cs" />
+    <Compile Include="RuleSetForClientSideMessagesAttribute.cs" />
+    <Compile Include="ValidationResultExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
@@ -90,6 +87,10 @@
       <Link>FluentValidation.snk</Link>
     </None>
   </ItemGroup>
+  <PropertyGroup>
+    <SignAssembly Condition="'$(PerformSigning)'=='True'">true</SignAssembly>
+    <OutputPath Condition="'$(PerformSigning)'=='True'">bin\$(Configuration)-Signed\</OutputPath>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

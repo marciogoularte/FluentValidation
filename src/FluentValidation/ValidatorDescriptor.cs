@@ -28,27 +28,28 @@ namespace FluentValidation {
 	/// Used for providing metadata about a validator.
 	/// </summary>
 	public class ValidatorDescriptor<T> : IValidatorDescriptor {
-		protected IEnumerable<IValidationRule<T>> Rules { get; private set; }
+		protected IEnumerable<IValidationRule> Rules { get; private set; }
 
-		public ValidatorDescriptor(IEnumerable<IValidationRule<T>> ruleBuilders) {
+		public ValidatorDescriptor(IEnumerable<IValidationRule> ruleBuilders) {
 			Rules = ruleBuilders;
 		}
 
 		public virtual string GetName(string property) {
 			var nameUsed = Rules
-				.OfType<PropertyRule<T>>()
-				.Where(x => x.Member.Name == property)
-				.Select(x => x.PropertyDescription).FirstOrDefault();
+				.OfType<PropertyRule>()
+				.Where(x => x.PropertyName == property)
+				.Select(x => x.GetDisplayName()).FirstOrDefault();
 
 			return nameUsed;
 		}
 
 		public virtual ILookup<string, IPropertyValidator> GetMembersWithValidators() {
-			var query = from rule in Rules.OfType<PropertyRule<T>>()
+			var query = from rule in Rules.OfType<PropertyRule>()
+						where rule.PropertyName != null
 						from validator in rule.Validators
-						select new { memberName = rule.Member.Name, validator };
+						select new { propertyName = rule.PropertyName, validator };
 
-			return query.ToLookup(x => x.memberName, x => x.validator);
+			return query.ToLookup(x => x.propertyName, x => x.validator);
 		}
 
 		public IEnumerable<IPropertyValidator> GetValidatorsForMember(string name) {
@@ -57,7 +58,7 @@ namespace FluentValidation {
 
 		public IEnumerable<IValidationRule> GetRulesForMember(string name) {
 			var query = from rule in Rules.OfType<PropertyRule>()
-						where rule.Member.Name == name
+						where rule.PropertyName == name
 						select (IValidationRule)rule;
 
 			return query.ToList();
@@ -72,5 +73,13 @@ namespace FluentValidation {
 
 			return GetName(member.Name);
 		}
+
+		public IEnumerable<IPropertyValidator> GetValidatorsForMember<TValue>(MemberAccessor<T, TValue> accessor)
+		{
+			return from rule in Rules.OfType<PropertyRule>()
+			       where Equals(rule.Member, accessor.Member)
+			       from validator in rule.Validators
+			       select validator;
+		} 
 	}
 }

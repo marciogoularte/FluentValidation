@@ -72,9 +72,11 @@ namespace FluentValidation.Tests {
 
 		private IPropertyValidator GetValidator<T>(Expression<Func<Demo, T >> expr, IValidator childValidator) {
 			var validator = new InlineValidator<Demo>();
+#pragma warning disable 612,618
 			validator.RuleFor(expr).SetValidator(childValidator);
+#pragma warning restore 612,618
 
-			var rule = (PropertyRule<Demo>)validator.Single();
+			var rule = (PropertyRule)validator.Single();
 			return rule.Validators.Single();
 		}
 

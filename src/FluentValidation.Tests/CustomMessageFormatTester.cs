@@ -17,6 +17,7 @@
 #endregion
 
 namespace FluentValidation.Tests {
+	using System;
 	using System.Linq;
 	using NUnit.Framework;
 
@@ -54,5 +55,37 @@ namespace FluentValidation.Tests {
 			string error = validator.Validate(person).Errors.Single().ErrorMessage;
 			error.ShouldEqual(expected);
 		}
+
+		[Test]
+		public void Uses_custom_delegate_for_building_message() {
+			validator.RuleFor(x => x.Surname).NotNull().Configure(cfg => {
+				cfg.MessageBuilder = context => "Test " + ((Person)context.Instance).Id;
+			});
+
+			var error = validator.Validate(new Person()).Errors.Single().ErrorMessage;
+			error.ShouldEqual("Test 0");
+		}
+
+		[Test]
+		public void Uses_property_value_in_message() {
+			validator.RuleFor(x => x.Surname).NotEqual("foo").WithMessage("was {0}", (person, name) => name);
+			var error = validator.Validate(new Person { Surname = "foo"}).Errors.Single().ErrorMessage;
+			error.ShouldEqual("was foo");
+		}
+
+		[Test]
+		public void Replaces_propertyvalue_placeholder() {
+			validator.RuleFor(x => x.Email).EmailAddress().WithMessage("Was '{PropertyValue}'");
+			var result = validator.Validate(new Person() {Email = "foo"});
+			result.Errors.Single().ErrorMessage.ShouldEqual("Was 'foo'");
+		}
+
+		[Test]
+		public void Replaces_propertyvalue_with_empty_string_when_null() {
+			validator.RuleFor(x => x.Surname).NotNull().WithMessage("Was '{PropertyValue}'");
+			var result = validator.Validate(new Person());
+			result.Errors.Single().ErrorMessage.ShouldEqual("Was ''");
+		}
+		
 	}
 }

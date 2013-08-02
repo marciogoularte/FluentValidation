@@ -30,12 +30,14 @@ namespace FluentValidation.Validators {
 			get { return childValidator; }
 		}
 
+		public Func<object, bool> Predicate { get; set; }
+
 		public ChildCollectionValidatorAdaptor(IValidator childValidator) {
 			this.childValidator = childValidator;
 		}
 
 		public override IEnumerable<ValidationFailure> Validate(PropertyValidatorContext context) {
-			if (context.Member == null) {
+			if (context.Rule.Member == null) {
 				throw new InvalidOperationException(string.Format("Nested validators can only be used with Member Expressions."));
 			}
 
@@ -46,23 +48,21 @@ namespace FluentValidation.Validators {
 			}
 
 			int count = 0;
+			
+			var predicate = Predicate ?? (x => true);
 
 			foreach (var element in collection) {
 
-				if(element == null) {
+				if(element == null || !(predicate(element))) {
 					// If an element in the validator is null then we want to skip it to prevent NullReferenceExceptions in the child validator.
 					// We still need to update the counter to ensure the indexes are correct.
 					count++;
 					continue;
 				}
 
-				var childPropertyChain = new PropertyChain(context.PropertyChain);
-				childPropertyChain.Add(context.Member);
-				childPropertyChain.AddIndexer(count++);
-
-				//The ValidatorSelector should not be propogated downwards. 
-				//If this collection property has been selected for validation, then all properties on those items should be validated.
-				var newContext = new ValidationContext(element, childPropertyChain, new DefaultValidatorSelector());
+				var newContext = context.ParentContext.CloneForChildValidator(element);
+				newContext.PropertyChain.Add(context.Rule.PropertyName);
+				newContext.PropertyChain.AddIndexer(count++);
 
 				var results = childValidator.Validate(newContext).Errors;
 

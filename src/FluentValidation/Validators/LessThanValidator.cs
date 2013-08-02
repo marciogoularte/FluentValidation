@@ -26,14 +26,14 @@ namespace FluentValidation.Validators {
 
 	public class LessThanValidator : AbstractComparisonValidator {
 		public LessThanValidator(IComparable value) : base(value, () => Messages.lessthan_error) {
-			SupportsStandaloneValidation = true;
 		}
 
-		public LessThanValidator(PropertySelector valueToCompareFunc, MemberInfo member) : base(valueToCompareFunc, member, () => Messages.lessthan_error) {
+		public LessThanValidator(Func<object, object> valueToCompareFunc, MemberInfo member)
+			: base(valueToCompareFunc, member, () => Messages.lessthan_error) {
 		}
 
 		public override bool IsValid(IComparable value, IComparable valueToCompare) {
-			return value.CompareTo(valueToCompare) < 0;
+			return Comparer.GetComparisonResult(value, valueToCompare) < 0;
 		}
 
 		public override Comparison Comparison {

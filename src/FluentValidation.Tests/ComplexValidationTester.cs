@@ -52,6 +52,18 @@ namespace FluentValidation.Tests {
 		}
 
 		[Test]
+		public void Should_override_propertyName() {
+			var validator = new TestValidator {
+				v => v.RuleFor(x => x.Address).SetValidator(new AddressValidator())
+					.OverridePropertyName("Address2")
+			};
+
+			var results = validator.Validate(person);
+			results.Errors[0].PropertyName.ShouldEqual("Address2.Postcode");
+		}
+
+
+		[Test]
 		public void Complex_validator_should_not_be_invoked_on_null_property() {
 			var results = validator.Validate(new Person());
 			results.Errors.Count.ShouldEqual(1);
@@ -80,6 +92,7 @@ namespace FluentValidation.Tests {
 			results.Errors.Last().PropertyName.ShouldEqual("Address.Country.Name");
 		}
 
+
 		[Test]
 		public void Complex_property_should_be_excluded() {
 			var results = validator.Validate(person, x => x.Surname);
@@ -102,6 +115,28 @@ namespace FluentValidation.Tests {
 			var result = validator.Validate(person);
 			result.IsValid.ShouldBeTrue();
 		}
+
+		[Test]
+		public void Can_validate_using_validator_for_base_type() {
+			var addressValidator = new InlineValidator<IAddress>() {
+				v => v.RuleFor(x => x.Line1).NotNull()
+			};
+
+			var validator = new TestValidator {
+				v => v.RuleFor(x => x.Address).SetValidator(addressValidator)	
+			};
+
+			var result = validator.Validate(new Person { Address = new Address() });
+			result.IsValid.ShouldBeFalse();
+		}
+
+		//[Test]
+		//public void Should_not_infinite_loop() {
+		//	var val = new InfiniteLoopValidator();
+		//	var target = new InfiniteLoop();
+		//	target.Property = new InfiniteLoop2 {Property = target};
+		//	val.Validate(target);
+		//}
 
 		private static string PointlessMethod() { return null; }
 
@@ -126,7 +161,27 @@ namespace FluentValidation.Tests {
 		}
 
 		public class PointlessStringValidator : AbstractValidator<string> {
-			
+
+		}
+
+		public class InfiniteLoop {
+			public InfiniteLoop2 Property { get; set; }
+		}
+
+		public class InfiniteLoop2 {
+			public InfiniteLoop Property { get; set; }
+		}
+
+		public class InfiniteLoopValidator : AbstractValidator<InfiniteLoop> {
+			public InfiniteLoopValidator() {
+				RuleFor(x => x.Property).SetValidator(new InfiniteLoop2Validator());
+			} 
+		}
+
+		public class InfiniteLoop2Validator : AbstractValidator<InfiniteLoop2> {
+			public InfiniteLoop2Validator() {
+				RuleFor(x => x.Property).SetValidator(new InfiniteLoopValidator());
+			}
 		}
 	}
 }

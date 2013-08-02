@@ -6,6 +6,9 @@ namespace FluentValidation.Resources {
 	/// Builds a delegate for retrieving a localised resource from a resource type and property name.
 	/// </summary>
 	public interface IResourceAccessorBuilder {
+		/// <summary>
+		/// Gets a function that can be used to retrieve a message from a resource type and resource name.
+		/// </summary>
 		Func<string> GetResourceAccessor(Type resourceType, string resourceName);
 	}
 
@@ -15,6 +18,9 @@ namespace FluentValidation.Resources {
 	/// </summary>
 	public class StaticResourceAccessorBuilder : IResourceAccessorBuilder {
 
+		/// <summary>
+		/// Builds a function used to retrieve the resource.
+		/// </summary>
 		public virtual Func<string> GetResourceAccessor(Type resourceType, string resourceName) {
 			var property = GetResourceProperty(ref resourceType, ref resourceName);
 
@@ -26,20 +32,30 @@ namespace FluentValidation.Resources {
 				throw new InvalidOperationException(string.Format("Property '{0}' on type '{1}' does not return a string", resourceName, resourceType));
 			}
 
-			Func<string> accessor = () => (string)property.GetValue(null, null);
+			var accessor = (Func<string>)Delegate.CreateDelegate(typeof(Func<string>), property.GetGetMethod());
 			return accessor;
 		}
 
 	
-		// ResourceType and ResourceName are ref parameters to allow derived types
-		// to replace the type/name of the resource before the delegate is constructed.
+		/// <summary>
+		/// Gets the PropertyInfo for a resource.
+		/// ResourceType and ResourceName are ref parameters to allow derived types
+		/// to replace the type/name of the resource before the delegate is constructed.
+		/// </summary>
 		protected virtual PropertyInfo GetResourceProperty(ref Type resourceType, ref string resourceName) {
 			return resourceType.GetProperty(resourceName, BindingFlags.Public | BindingFlags.Static);
 		}
 	}
 
+	/// <summary>
+	/// Implemenetation of IResourceAccessorBuilder that can fall back to the default resource provider.
+	/// </summary>
 	public class FallbackAwareResourceAccessorBuilder : StaticResourceAccessorBuilder {
-
+		/// <summary>
+		/// Gets the PropertyInfo for a resource.
+		/// ResourceType and ResourceName are ref parameters to allow derived types
+		/// to replace the type/name of the resource before the delegate is constructed.
+		/// </summary>
 		protected override PropertyInfo GetResourceProperty(ref Type resourceType, ref string resourceName) {
 			// Rather than just using the specified resource type to find the resource accessor property
 			// we first look on the ResourceProviderType which gives our end user the ability  

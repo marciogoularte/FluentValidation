@@ -49,6 +49,11 @@ namespace FluentValidation.Tests {
 		}
 
 		[Test]
+		public void Should_succeed_when_less_than_input_using_different_types() {
+			new LessThanOrEqualValidator(100M).IsValid(20D, 100M).ShouldBeTrue();
+		}
+
+		[Test]
 		public void Should_succeed_when_equal_to_input() {
 			var result = validator.Validate(new Person{Id=value});
 			result.IsValid.ShouldBeTrue();
@@ -72,5 +77,32 @@ namespace FluentValidation.Tests {
 			result.IsValid.ShouldBeFalse();
 		}
 
+		[Test]
+		public void Validates_with_nullable_when_property_is_null() {
+			validator = new TestValidator(v => v.RuleFor(x => x.NullableInt).LessThanOrEqualTo(5));
+			var result = validator.Validate(new Person());
+			result.IsValid.ShouldBeTrue();
+		}
+
+		[Test]
+		public void Validates_with_nullable_when_property_not_null() {
+			validator = new TestValidator(v => v.RuleFor(x => x.NullableInt).LessThanOrEqualTo(5));
+			var result = validator.Validate(new Person { NullableInt = 10 });
+			result.IsValid.ShouldBeFalse();
+		}
+
+        [Test]
+        public void Validates_with_nullable_when_property_is_null_cross_property() {
+            validator = new TestValidator(v => v.RuleFor(x => x.NullableInt).LessThanOrEqualTo(x => x.Id));
+            var result = validator.Validate(new Person { Id = 5 });
+            result.IsValid.ShouldBeTrue();
+        }
+
+        [Test]
+        public void Validates_with_nullable_when_property_not_null_cross_property() {
+            validator = new TestValidator(v => v.RuleFor(x => x.NullableInt).LessThanOrEqualTo(x => x.Id));
+            var result = validator.Validate(new Person { NullableInt = 10, Id = 5 });
+            result.IsValid.ShouldBeFalse();
+        }
 	}
 }

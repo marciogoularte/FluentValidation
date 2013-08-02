@@ -17,6 +17,7 @@
 #endregion
 
 namespace FluentValidation.Validators {
+	using System;
 	using System.Collections;
 	using System.Reflection;
 	using Attributes;
@@ -25,14 +26,15 @@ namespace FluentValidation.Validators {
 
 	public class NotEqualValidator : PropertyValidator, IComparisonValidator {
 		readonly IEqualityComparer comparer;
-		readonly PropertySelector func;
+		readonly Func<object, object> func;
 
-		public NotEqualValidator(PropertySelector func, MemberInfo memberToCompare) : base(() => Messages.notequal_error) {
+		public NotEqualValidator(Func<object, object> func, MemberInfo memberToCompare)
+			: base(() => Messages.notequal_error) {
 			this.func = func;
 			MemberToCompare = memberToCompare;
 		}
 
-		public NotEqualValidator(PropertySelector func, MemberInfo memberToCompare, IEqualityComparer equalityComparer)
+		public NotEqualValidator(Func<object, object> func, MemberInfo memberToCompare, IEqualityComparer equalityComparer)
 			: base(() => Messages.notequal_error) {
 			this.func = func;
 			this.comparer = equalityComparer;
@@ -42,14 +44,12 @@ namespace FluentValidation.Validators {
 		public NotEqualValidator(object comparisonValue)
 			: base(() => Messages.notequal_error) {
 			ValueToCompare = comparisonValue;
-			SupportsStandaloneValidation = true;
 		}
 
 		public NotEqualValidator(object comparisonValue, IEqualityComparer equalityComparer)
 			: base(() => Messages.notequal_error) {
 			ValueToCompare = comparisonValue;
 			comparer = equalityComparer;
-			SupportsStandaloneValidation = true;
 		}
 
 		protected override bool IsValid(PropertyValidatorContext context) {
@@ -57,7 +57,7 @@ namespace FluentValidation.Validators {
 			bool success = !Compare(comparisonValue, context.PropertyValue);
 
 			if (!success) {
-				context.MessageFormatter.AppendArgument("PropertyValue", context.PropertyValue);
+				context.MessageFormatter.AppendArgument("ComparisonValue", comparisonValue);
 				return false;
 			}
 
@@ -83,7 +83,12 @@ namespace FluentValidation.Validators {
 			if(comparer != null) {
 				return comparer.Equals(comparisonValue, propertyValue);
 			}
-			return Equals(comparisonValue, propertyValue);
+
+			if (comparisonValue is IComparable && propertyValue is IComparable) {
+				return Internal.Comparer.GetEqualsResult((IComparable)comparisonValue, (IComparable)propertyValue);
+			}
+
+			return comparisonValue == propertyValue;
 		}
 	}
 }

@@ -25,6 +25,9 @@ namespace FluentValidation.Internal {
 	using System.Text.RegularExpressions;
 	using Validators;
 
+	/// <summary>
+	/// Useful extensions
+	/// </summary>
 	public static class Extensions {
 		internal static void Guard(this object obj, string message) {
 			if (obj == null) {
@@ -38,6 +41,9 @@ namespace FluentValidation.Internal {
 			}
 		}
 
+		/// <summary>
+		/// Gets a MemberInfo from a member expression.
+		/// </summary>
 		public static MemberInfo GetMember(this LambdaExpression expression) {
 			var memberExp = RemoveUnary(expression.Body);
 
@@ -48,6 +54,9 @@ namespace FluentValidation.Internal {
 			return memberExp.Member;
 		}
 
+		/// <summary>
+		/// Gets a MemberInfo from a member expression.
+		/// </summary>
 		public static MemberInfo GetMember<T, TProperty>(this Expression<Func<T, TProperty>> expression) {
 			var memberExp = RemoveUnary(expression.Body);
 
@@ -67,6 +76,9 @@ namespace FluentValidation.Internal {
 		}
 
 
+		/// <summary>
+		/// Splits pascal case, so "FooBar" would become "Foo Bar"
+		/// </summary>
 		public static string SplitPascalCase(this string input) {
 			if (string.IsNullOrEmpty(input)) {
 				return input;
@@ -86,7 +98,7 @@ namespace FluentValidation.Internal {
 			return Expression.Lambda<Func<T, TProperty>>(constant, parameter);
 		}
 
-		public static void ForEach<T>(this IEnumerable<T> source, Action<T> action) {
+		internal static void ForEach<T>(this IEnumerable<T> source, Action<T> action) {
 			foreach(var item in source) {
 				action(item);	
 			}
@@ -95,8 +107,9 @@ namespace FluentValidation.Internal {
 		/// <summary>
 		/// Based on a child validator and a propery rule, infers whether the validator should be wrapped in a ChildValidatorAdaptor or a CollectionValidatorAdaptor
 		/// </summary>
-		internal static IPropertyValidator InferPropertyValidatorForChildValidator<T>(PropertyRule<T> rule, IValidator childValidator) {
+		internal static IPropertyValidator InferPropertyValidatorForChildValidator(PropertyRule rule, IValidator childValidator) {
 			// If the property implements IEnumerable<T> and the validator validates T, assume it's a collection property validator
+			// This is here for backwards compatibility with v2. V3 uses the new SetCollectionValidator method.
 			if (DoesImplementCompatibleIEnumerable(rule.TypeToValidate, childValidator)) {
 				return new ChildCollectionValidatorAdaptor(childValidator);
 			}
@@ -119,6 +132,18 @@ namespace FluentValidation.Internal {
 							 select i;
 
 			return interfaces.Any();
+		}
+
+		public static Func<object, object> CoerceToNonGeneric<T, TProperty>(this Func<T, TProperty> func) {
+			return x => func((T)x);
+		} 
+
+		public static Func<object, bool> CoerceToNonGeneric<T>(this Func<T, bool> func) {
+			return x => func((T)x);
+		}
+
+		public static Action<object> CoerceToNonGeneric<T>(this Action<T> action) {
+			return x => action((T)x);
 		}
 
 #if WINDOWS_PHONE

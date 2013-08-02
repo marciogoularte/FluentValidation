@@ -32,7 +32,16 @@ namespace FluentValidation.Validators {
 			this.expression = expression;
 			regex = new Regex(expression);
 
-			SupportsStandaloneValidation = true;
+		}
+
+		public RegularExpressionValidator(Regex regex) : base(() => Messages.regex_error) {
+			this.expression = regex.ToString();
+			this.regex = regex;
+		}
+
+		public RegularExpressionValidator(string expression, RegexOptions options) : base(() => Messages.regex_error) {
+			this.expression = expression;
+			this.regex = new Regex(expression, options);
 		}
 
 		protected override bool IsValid(PropertyValidatorContext context) {

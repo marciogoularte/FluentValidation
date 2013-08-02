@@ -10,9 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FluentValidation</RootNamespace>
     <AssemblyName>FluentValidation</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>..\FluentValidation.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -33,6 +33,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -77,24 +78,30 @@
     <Compile Include="AssemblyScanner.cs" />
     <Compile Include="Attributes\AttributedValidatorFactory.cs" />
     <Compile Include="Attributes\ValidatorAttribute.cs" />
+    <Compile Include="CollectionValidatorExtensions.cs" />
     <Compile Include="DefaultValidatorExtensions.cs" />
     <Compile Include="DefaultValidatorOptions.cs" />
     <Compile Include="InlineValidator.cs" />
+    <Compile Include="Internal\CollectionPropertyRule.cs" />
+    <Compile Include="Internal\Comparer.cs" />
     <Compile Include="Internal\DefaultValidatorSelector.cs" />
     <Compile Include="Internal\DelegateValidator.cs" />
     <Compile Include="Internal\Extensions.cs" />
     <Compile Include="Internal\IConfigurable.cs" />
     <Compile Include="Internal\IFluentInterface.cs" />
     <Compile Include="Internal\InstanceCache.cs" />
-    <Compile Include="Internal\PropertySelector.cs" />
-    <Compile Include="Internal\ResourceHelper.cs" />
+    <Compile Include="Internal\RulesetValidatorSelector.cs" />
+    <Compile Include="Internal\TrackingCollection.cs" />
     <Compile Include="IValidationRule.cs" />
     <Compile Include="Internal\MemberNameValidatorSelector.cs" />
     <Compile Include="Internal\MessageFormatter.cs" />
     <Compile Include="Internal\PropertyChain.cs" />
     <Compile Include="Internal\PropertyRule.cs" />
+    <Compile Include="MemberAccessor.cs" />
+    <Compile Include="PropertyRuleValidatorExtensions.cs" />
     <Compile Include="Resources\IStringSource.cs" />
     <Compile Include="Resources\IResourceAccessorBuilder.cs" />
+    <Compile Include="Resources\LazyStringSource.cs" />
     <Compile Include="Resources\LocalizedStringSource.cs" />
     <Compile Include="Resources\StaticStringSource.cs" />
     <Compile Include="ValidationContext.cs" />
@@ -120,6 +127,7 @@
     <Compile Include="Validators\AbstractComparisonValidator.cs" />
     <Compile Include="Validators\ChildCollectionValidatorAdaptor.cs" />
     <Compile Include="Validators\ChildValidatorAdaptor.cs" />
+    <Compile Include="Validators\CreditCardValidator.cs" />
     <Compile Include="Validators\EmailValidator.cs" />
     <Compile Include="Validators\EqualValidator.cs" />
     <Compile Include="Validators\ExclusiveBetweenValidator.cs" />
@@ -141,20 +149,44 @@
     <Compile Include="Validators\PropertyValidator.cs" />
     <Compile Include="Validators\PropertyValidatorContext.cs" />
     <Compile Include="Validators\RegularExpressionValidator.cs" />
+    <Compile Include="Validators\ScalePrecisionValidator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Messages.de.resx" />
-    <EmbeddedResource Include="Resources\Messages.es.resx" />
-    <EmbeddedResource Include="Resources\Messages.fr.resx" />
-    <EmbeddedResource Include="Resources\Messages.it.resx" />
-    <EmbeddedResource Include="Resources\Messages.nl.resx" />
-    <EmbeddedResource Include="Resources\Messages.pt.resx" />
+    <EmbeddedResource Include="Resources\Messages.ru.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Messages.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Messages.es.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Messages.fr.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Messages.it.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Messages.nl.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Messages.pl.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Messages.pt.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\Messages.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Messages.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Messages.sv.resx" />
+    <EmbeddedResource Include="Resources\Messages.sv.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Messages.tr.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\FluentValidation.snk">
@@ -178,6 +210,10 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <PropertyGroup>
+    <SignAssembly Condition="'$(PerformSigning)'=='True'">true</SignAssembly>
+    <OutputPath Condition="'$(PerformSigning)'=='True'">bin\$(Configuration)-Signed\</OutputPath>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

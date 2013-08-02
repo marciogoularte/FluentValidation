@@ -1,3 +1,74 @@
+4.1 - 
+* Display name is now lazily-loaded by default (as a result, localization via DisplayAttribute now works correctly)
+
+4.0 - 29/04/2013 
+* Add portable class library and deprecate the Silverlight-specific projects
+* Added scale precision validator (thanks to Matthew Leibowitz)
+* Added the ability to replace property rules (thanks to Matthew Leibowitz)
+* Added a slightly better value type comparer (thanks to Matthew Leibowitz)
+* Added RuleForEach
+* Additonal overloads of Matches
+* Added MemberAccessor (thanks to Mark Welsh)
+* Fix issue where OverridePropertyName didn't work with SetValidator/SetCollectionValidator
+* Add virtual CreateValidator method in to FluentValidationModelValidatorProvider
+* Add custom error message builder
+* *Breaking* LengthValidator no longer treats null inputs as length 0. This is now consistent with other validators.
+* *Breaking* Change default error messages for Equal/NotEqual validators to use {ComparisonValue} rather than {PropertyValue} for consistency.
+* All validators can now access the current property value inside the error message using {PropertyValue}
+
+3.4 - 17/08/2012
+* Make ValidationResut.IsValid virtual
+* Add private no-arg ctor to ValidationFailure to help with serialization
+* Add Turkish error messages
+* Work-around for reflection bug in .NET 4.5
+* BREAKING CHANGE - Assemblies are now unsigned.
+
+3.3 - 30 March 2012
+* Added additional overload for Must that accepts a PropertyValidatorContext.
+* Allow rules not in a RuleSet to be executed in addition to rules in a ruleset, eg: validator.Validate(instance, ruleSet: "default,MyRuleset");
+* Support Custom rules within top level When conditions.
+* Russian localization
+* MVC4 compatibility
+
+3.2 - 14 November 2011
+* Fixed issue #7084 (NotEmptyValidator does not work with EntityCollection<T>)
+* Fixed issue #7087 (AbstractValidator.Custom ignores RuleSets and always runs)
+* Removed support for WP7 for now as it doesn't support co/contravariance without crashing.
+
+3.1 - 29 July 2011
+* Support using nullables with cross-property comparisons (GreaterThan/GreaterThanOrEqual/LessThan/LessThanOrEqual)
+* Deprecate and exclude mvc metadata extensions. This is out of scope for FV, but the code for this functionality is still in the repo if anyone still depends on this.
+* Add support for shared conditions based on David Alpert's patch.
+
+3.0.0.1 - 5 July 2011
+* Workaround issue caused by referencing DataAnnotations in windows client projects (eg WPF). Does not affect web projects/silverlight.
+
+3.0 - 25 June 2011
+* Dropped compatibility for .NET 3.5 and MVC2.
+* Removed the SupportsStandaloneValidation property - this was never properly implemented.
+* Implemented Rule Sets
+* Add support for CustomizeValidatorAttribute when using MVC integration.
+* Remove generic PropertyRule<T> - use non-generic version instead.
+* Better support for custom client-side error messages for LengthValidator.
+* Add support for MVC3's IClientValidatable
+* Implement client-side support for InclusiveBetween validator.
+* Implement client-side support for Equal with cross-property validation.
+* Implement client-side support for email validator.
+* Added credit card validator (plus client side support)
+* Add IValidatorInterceptor interface. This can be used to add pre/post hooks to MVC validation integration. An interceptor can either be specified as part of the CustomizeValidatorAttribute or implemented in the validator.
+* Better handling of nullable value types.
+* Add static FluentValidationModelValidatorProvider.Configure for configuring MVC integration with default options.
+* Fixed edge case where custom property names didn't work for Required rules on non-nullable value types in MVC integration.
+* Patch - Polish localization.
+* Additional overloads of WithLocalizedMessage that support custom format args for consistency with WithMessage.
+* Bug fix - overload for NotEqual that takes an expression and an IEqualityComparer did not use the comparer.
+* Added the ability to specify which ruleset is used to generate client-side rules.
+* Introduced SetCollectionValidator for validating collections (replaces non-generic overload of SetValidator)
+* Better type safety using child collection validators.
+* Better control of which elements in a child collection are validated using the new Where method.
+* Support rules for nested properties at the top level (without needing to use a child validator)
+* Support DisplayAttribute/DisplayNameAttribute for inferring property names
+
 2.0 - 13 January 2011
 * Fix typo in the name of FallbackAwareResourceAccessorBuilder
 * Fix issue #7062 - allow validator selectors to work against nullable properties with overriden names.

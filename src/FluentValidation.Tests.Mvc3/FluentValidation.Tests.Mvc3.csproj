@@ -1,11 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{0624E8C9-10A4-40C3-A355-102D69BD8271}</ProjectGuid>
+    <ProjectGuid>{73A2D2C0-694F-468C-A3A6-3CDB38900350}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FluentValidation.Tests</RootNamespace>
@@ -38,9 +38,9 @@
       <HintPath>..\..\lib\nunit\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Web.Mvc, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\mvc\v3\System.Web.Mvc.dll</HintPath>
     </Reference>
@@ -51,22 +51,34 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientsideMessageTester.cs" />
-    <Compile Include="FluentValidationModelMetadataProviderTester.cs" />
-    <Compile Include="FluentValidationModelValidatorProviderTests.cs" />
-    <Compile Include="ModelBinderTester.cs" />
+    <Compile Include="..\FluentValidation.Tests\TestExtensions.cs">
+      <Link>TestExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\FluentValidation.Tests\TestMessages.Designer.cs">
+      <Link>TestMessages.Designer.cs</Link>
+    </Compile>
+    <Compile Include="..\FluentValidation.Tests.Mvc4\ClientsideMessageTester.cs"><Link>ClientsideMessageTester.cs</Link></Compile>
+    <Compile Include="..\FluentValidation.Tests.Mvc4\ModelBinderTester.cs"><Link>ModelBinderTester.cs</Link></Compile>
+    <Compile Include="..\FluentValidation.Tests.Mvc4\ValidationResultExtensionTests.cs"><Link>ValidationResultExtensionTests.cs</Link></Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FluentValidation.Mvc3\FluentValidation.Mvc3.csproj">
-      <Project>{A2D31732-F255-4F05-8412-3C8C29B65755}</Project>
+      <Project>{a2d31732-f255-4f05-8412-3c8c29b65755}</Project>
       <Name>FluentValidation.Mvc3</Name>
     </ProjectReference>
     <ProjectReference Include="..\FluentValidation\FluentValidation.csproj">
-      <Project>{DAE0249B-4F69-4AC9-9A17-AA23E0795316}</Project>
+      <Project>{dae0249b-4f69-4ac9-9a17-aa23e0795316}</Project>
       <Name>FluentValidation</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\FluentValidation.Tests\TestMessages.fr.resx">
+      <Link>TestMessages.fr.resx</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\FluentValidation.Tests\TestMessages.resx">
+      <Link>TestMessages.resx</Link>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
